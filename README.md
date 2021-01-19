@@ -19,7 +19,7 @@ Working with a web component's lifecycle is simplified by breaking down the
 rendering process into a few distinct steps. This section may seem daunting, but
 in reality, all of this happens behind the scenes.
 
-The table below maps each lifestyle step to a hook and a verb class method.
+The table below maps each lifecycle step to a hook and a verb class method.
 
 | Step          | Hook        | Method (verb) |
 |---------------|-------------|---------------|
@@ -201,7 +201,7 @@ document.body.innerHTML = '<song-list></song-list>'
 let songListElement = document.querySelector('song-list')
 
 // since Elements automatically render upon injection in the DOM,
-// calling `render()` is always technically are*render
+// calling `render()` is always technically a *rerender*
 songListElement.render(options) // you can give options to render()
 
 // you can trigger individual lifecycle steps if you want, but this
@@ -210,11 +210,16 @@ songListElement.spawn()
 songListElement.build()
 songListElement.load()
 
-// watch certain attributes of this instance
-songListElement.watchAttr(['id'])
+// watch certain attributes of this instance.
+songListElement.watchAttr(['data-list', 'data-date'], () => {
+  console.log('data-list or data-date changed')
+})
 
 // enable infinite scroll on this instance
-songListElement.supportInfiniteScroll()
+// (arguments are not defined in this example)
+songListElement.supportInfiniteScroll(() => {
+  console.log('user scrolled to near the bottom of this element')
+})
 
 // "Interacting" state, implemented specifically for Hydra Media Center
 songListElement.supportInteractingState()
@@ -244,16 +249,16 @@ this.props.listName = 'Playlist 1'
 
 ## Dynamically creating live components (`Lowrider.elementFactory()`)
 
-Lowrider.js comes with a static method that can create web component
-instances with data pre-bound to them. This is especially useful when you
-have a parent-child relationship between two components, and the child is
-designed to spawn with data from the parent that cannot be stringified
-(functions, Element references, etc), or is too large to fit into an element
-attribute when stringified.
+Lowrider.js comes with a static method that can create web component instances
+with data pre-bound to them. This is especially useful when you have a
+parent-child relationship between two components, and the child is designed to
+spawn with data from the parent that cannot be stringified (functions, object
+refs, Element references, etc), or is too large to fit into an element attribute
+when stringified.
 
 Usage:
 ```javascript
-import Lowrider from 'Lowrider'
+import Lowrider from './Lowrider/'
 
 // in the parent component, create a child component with pre-bound data
 let childEl = Lowrider.elementFactory('child-element', {
