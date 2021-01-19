@@ -145,18 +145,15 @@ necessary.
 
 ## Component State
 
-Managing component state is complicated by caching. While Lowrider.js does
-not provide a built-in cache storage, it is prepared for you to cache your
+Managing component state is complicated by caching. While Lowrider.js does not
+provide a built-in cache storage, it is prepared for you to cache your
 components by saving their **outerHTML** property. When you cache a component
-this way and reinject it, Lowrider.js will detect the existing inner and outer
-HTML, and the `build` event will not trigger.
+this way and reinject it, Lowrider.js will detect the existing innerHTML, and
+the `build` event will not trigger.
 
 Each component can use a custom render checker. Simply overwrite Lowrider.js's
 built in `shouldRender()` method with your own when extending the Lowrider class
 and make sure your method returns a boolean.
-
-Lowrider.js is designed for use with the light DOM and hasn't been tested with
-the Shadow DOM.
 
 ## Typical Component Experience:
 
@@ -177,7 +174,7 @@ The typical experience that you can expect to deliver to your users is:
 
 ## Usage example
 
-```
+```javascript
 import Lowrider from './Lowrider.js/'
 
 // create a class that extends the Lowrider class
@@ -237,7 +234,7 @@ object.**
 
 Example:
 
-```
+```javascript
 // in the inner HTML:
 <p data-prop="listName"></p>
 
@@ -255,7 +252,7 @@ designed to spawn with data from the parent that cannot be stringified
 attribute when stringified.
 
 Usage:
-```
+```javascript
 import Lowrider from 'Lowrider'
 
 // in the parent component, create a child component with pre-bound data
@@ -303,3 +300,5 @@ Lowrider.js, to save you from having to find out on your own after putting time 
   the one the user sees. If you want to have "background" components, you'll
   need to hide them with CSS, and they can't execute code until they exist in
   the DOM.
+- Lowrider.js is designed for use with the light DOM and hasn't been tested with
+  the Shadow DOM.
