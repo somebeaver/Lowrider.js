@@ -6,8 +6,8 @@ Lowrider.js is a web component class written for Hydra Media Center that aims to
 simplify working with web components in a completely vanilla JavaScript
 envrionment.
 
-It does this by providing methods for managing the **lifecycle** and **state** of
-your web components, which normalizes their behavior, providing you with a more
+It does this by providing methods for managing the **component lifecycle** and
+**component state**, which normalizes their behavior, providing you with a more
 predictable foundation upon which to build your components.
 
 Lowrider.js is not a framework. It's only job is to implement a few critical
@@ -17,46 +17,64 @@ core concepts.
 
 Working with a web component's lifecycle is simplified by breaking down the
 rendering process into a few distinct steps. This section may seem daunting, but
-in reality, all of this happens behind the scenes.
+much of this happens behind the scenes.
 
 The table below maps each lifecycle step to a hook and a verb class method.
 
-| Step          | Hook        | Method (verb) |
-|---------------|-------------|---------------|
-| spawn         | `onSpawn()` | `spawn()`     |
-| build         | `onBuild()` | `build()`     |
-| load          | `onLoad()`  | `load()`      |
+| Event         | Hook          | Method (verb) |
+|---------------|---------------|---------------|
+| spawn         | `onSpawn()`   | `spawn()`     |
+| build         | `onBuild()`   | `build()`     |
+| load          | `onLoad()`    | `load()`      |
+| removed       | `onRemoved()` | -             |
 
-**<ins>tl;dr of Each Step</ins>:**
+**<ins>Component Lifecycle tl;dr:</ins>:**
 
 1. `spawn` - Always the first step triggered when an Element instance is
    created in the document, or the component's `render()` method is called. Can
    be thought of as a "pre-innerHTML-render" hook.
-2. `build` - Builds the inner HTML of the web component. Expensive queries
-   should be performed here, as the results of this step are what's cached.
-   Whether this step runs or not is determined by the component's `shouldBuild()`
-   method, which determines if this instance already has cached data and whether
-   it should perform a full render. By default, it checks for the existance of
-   any inner HTML.
+2. `build` - Builds the inner HTML of the web component. Expensive logic
+   should be performed here. This step is skipped when loading cached
+   components, making them feel very fast.
 3. `load` - Triggered after all child Elements, *and their children*, have
    rendered. The *waiting for children* part only works if all the child
    Elements are either native HTML elements (`div`, `span`, etc), or they are
-   instances of Lowrider.js.
+   instances of `Lowrider`.
 
-Lowrider.js's main benefit is that it will automatically manage these
-lifecycle events for you, and only trigger the appropiate hooks when
+Lowrider.js's primary benefit is that it will automatically manage these
+lifecycle events for you, and only trigger the appropiate events when
 necessary.
 
-**<ins>Detailed Breakdown of Each Hook</ins>:**
+### Lifecycle Event Hooks
+
+Lifecycle **hooks** are used to react to the lifecycle events of your
+Lowrider.js component. Properly separating your component's code into the
+appropiate hooks is crucial for building components that behave in the ways that
+you expect after reading this documentation.
+
+When the component is first created (inserted into the DOM), it will run through
+the `spawn`, `build`, and `load` lifecycle events and trigger the associated
+hooks that you've implemented, which should result in a fully functional web
+component. Each event waits for the previous one to finish during the rendering
+process.
+
+When a component is removed from the DOM, the `removed` event triggers. This
+event triggers *before* the actual removal, so you still have access to
+component data in this hook.
+
+When a component is reinserted into the DOM with a cached state, the `build`
+event does not trigger, allowing for much faster rendering using cached data.
+The `spawn` and `load` events will still trigger. Efficiently separating
+your code between these three events is the art of using Lowrider.js.
+
+Ultimately, Lowrider.js implements a reliable and efficient 'render -> cache ->
+rerender-from-cache' cycle that is ready for complex logic to be built upon.
 
 #### `.onSpawn()`
 - Usage:
   - The `spawn` event is the very first step in the rendering process. It is
     triggered immediately after the custom Element is inserted into the DOM,
-    before the Element has been painted onto the screen. Your `onSpawn`
-    method should be the "brains" of the Element, and can handle loading
-    dynamic data that's required during the entire lifecycle of the Element.
-    Do not interact with innerHTML during the spawn step.
+    before the Element has been painted onto the screen.
 - Solves these issues:
   - When loading a pre-rendered custom Element from cache, the instance will
     no longer have any dynamic data because the Element itself was removed
@@ -67,43 +85,41 @@ necessary.
   - Keep the spawn event as lightweight as possible because many of them will
     trigger at the same time if there are many instances of the Element in
     the DOM, even when loading from cache.
-  - The `spawn` event should not create any new inner HTML (it will overwrite
-    what may have been cached).
+  - The `spawn` event should not create any new inner HTML, or even attempt to
+    interact with inner HTML.
   - The `onSpawn` method can be used to register event handlers directly on
     the custom Element, to determine context, to load internal data, to
     register IPC listeners, MutationObservers, and more.
 - Real life example:
-  - If you were making a todo list application, this step could be used to
+  - If you were making a todo list application, this hook could be used to
     register event listeners directly on the `<todo-list>` itself (**not** on
-    child HTML), or to register an attribute observer. A simple todo app
-    could completely omit this step.
+    child HTML), or to register an attribute observer. A simpler todo app
+    could completely omit this hook.
 
 #### `.onBuild()`
 - Usage:
   - The `build` event triggers after the `spawn` event has completed. Your
     `onBuild` method should create the "body" of the instance by injecting inner
-    HTML. The HTML may come from a .html file on the local disk, from a XHR
-    request, or may be statically typed within the class definition. This method
-    should always perform a "fresh" build and overwrite any preexisting child
-    HTML. Other Elements should be able to invoke your Lowrider.js included
-    `build()` method and the result should be a fresh build every time.
+    HTML. Typically, HTML may come from a .html file on the local disk, from a
+    XHR request, or may be statically typed within the class definition. This
+    method should always perform a "fresh" build and overwrite any preexisting
+    inner HTML.
 - Solves these issues:
-  - When loading pre-rendered custom Elements from cache, it is necessary to
-    maintain the state of the pre-rendered HTML. To do that, we must be able
-    to block the Element from rendering when it's being loaded from cache.
-    This is easy when the rendering logic is separate from all other logic.
-    It also prevents needless XHR requests when we already have the data.
+  - When loading cached components, it is necessary to maintain the state of the
+    cached HTML. This is easy when the rendering logic is separate from all
+    other logic. It also prevents needless network requests when we already have
+    the data.
 - Tips:
   - The `onBuild` method is the right place for the heaviest work of your
     component.
   - Do not register event handlers in the `onBuild` hook, because they won't
     fire on subsequent reloads of this instance from cache. Defer your event
-    handler registration to the `onLoad` step, which guarentees that everything
+    handler registration to the `load` event, which guarentees that everything
     from this step has rendered.
 - Real life example:
-  - A todo list application should definitely use this step to query the
+  - A todo list application should definitely use this hook to query the
     database for the contents of the todo list, and any other data that needs
-    to be shown. It should also use this step to build the inner HTML and
+    to be shown. It should also use this hook to build the inner HTML and
     inject it into the DOM. These are the heaviest tasks of the todo list,
     and it's what we would want to be cached.
 
@@ -111,66 +127,56 @@ necessary.
 - Usage:
   - This is triggered after this instance, and all child Lowrider.js/vanilla
     Elements have rendered (only when **all child custom Elements** extend
-    Lowrider.js).
+    `Lowrider`).
 - Solves these issues:
-  - One issue with web components and the light DOM is that when you use custom
+  - One issue with web components face in the DOM is that when you use custom
     Element "A" to inject custom Element "B", code execution within "A" does not
     wait for "B" to render *its own inner HTML*. The top-level
     `connectedCallback()` of "B" will have executed, but any subsequent Promises
     or callbacks will still be executing. The `onLoad` callback fixes this and
-    will only fire after child custom Elements have rendered *their* inner HTML.
-    When all of your child custom Elements extend Lowrider, you can be sure that
-    the entire chain of child Elements has rendered before "A"s `onLoad`
-    triggers.
+    will only fire after child components have rendered *their* inner HTML. When
+    all of your child custom Elements extend Lowrider, you can be sure that the
+    entire chain of custom Elements has rendered before "A"s `onLoad` hook
+    triggers. This makes working with nested components easier.
 - Tips:
   - In general, web components should avoid registering event handlers on the
-    contents of other web components. A DOM nodes concerns should be scoped
+    contents of other web components. A DOM node's concerns should be scoped
     to within its own component.
 - Real life example:
   - A todo list application would use this step to register event handlers on
-    its rendered inner HTML. They could be drag-n-drop handlers, clicks, or
-    whatever else. This is the right time to interact with inner HTML.
+    the inner HTML, because we can be certain that is has rendered by this
+    point. They could be drag-n-drop handlers, clicks, or whatever else. This is
+    the right time to interact with inner HTML.
 
 #### `onRemoved()`
 - Usage:
-  - This is triggered when the Element is removed from the DOM.
+  - This is triggered when the Element is removed from the DOM. There is no
+    Lowrider.js verb method for this event; instead use the native DOM methods
+    for removing Elements.
 - Tips:
   - Use this to clean up any delegated event handlers, IPC listeners,
-    EventEmitters, and MutationObservers.
+    EventEmitters, or MutationObservers.
+  - This fires before the actual removal of the Element, so you still have
+    access to its state.
 - Real life example:
-  - A todo list application would proabably omit this step (event handlers
-    would be automatically removed when those nodes are removed), but could
-    use this step to perform last second writes to the database to record
-    user interaction.
+  - A todo list application would proabably omit this step (event handlers would
+    be automatically removed when those nodes are removed), but could use this
+    step to perform last second writes to the database to record data.
 
 ## Component State
 
-Managing component state is complicated by caching. While Lowrider.js does not
-provide a built-in cache storage, it is prepared for you to cache your
-components by saving their **outerHTML** property. When you cache a component
-this way and reinject it, Lowrider.js will detect the existing innerHTML, and
-the `build` event will not trigger.
+(Hydra Media Center uses `hydra-ui-router` to perform the caching of Lowrider.js
+components.)
+
+Managing and maintaining a components state is a critical part of building an
+application. While Lowrider.js does not provide a built-in cache storage, it is
+prepared for you to cache your components by saving their **outerHTML**
+property. When you cache a component this way and reinject it, Lowrider.js will
+detect the existing innerHTML, and the `build` event will not trigger.
 
 Each component can use a custom render checker. Simply overwrite Lowrider.js's
 built in `shouldRender()` method with your own when extending the Lowrider class
 and make sure your method returns a boolean.
-
-## Typical Component Experience:
-
-The typical experience that you can expect to deliver to your users is:
-
-1. User loads HTML document with Lowrider.js components.
-2. Each Lowrider.js component goes through it's `spawn`, `build`, and `load`
-   steps, since this is the first load of the document.
-3. The user may interact with a component, changing its state. Perhaps a table
-   is sorted after a click, or maybe more data is injected via AJAX.
-4. The user navigates away to a new page...
-5. ...But before you load the new page for the user, you cache the `outerHTML`
-   property of the web component that the user interacted with.
-6. The user eventually navigates back to the same page from before, but instead
-   of loading a fresh component instance, you reinject the previously cached `outerHTML`.
-7. Lowrider.js automatically detects this, and does not trigger the `build` step
-   of your component. Your component is loaded in its preserved state.
 
 ## Usage example
 
@@ -195,14 +201,7 @@ window.customElements.define('song-list', SongList)
 // begins by invoking your `onSpawn` method.
 document.body.innerHTML = '<song-list></song-list>'
 
-// your component will automatically have these methods and properties,
-// they are the public API of your Element instances.
-// do not overwrite them (but you can if you know what you're doing)
 let songListElement = document.querySelector('song-list')
-
-// since Elements automatically render upon injection in the DOM,
-// calling `render()` is always technically a *rerender*
-songListElement.render(options) // you can give options to render()
 
 // you can trigger individual lifecycle steps if you want, but this
 // isn't normally needed
@@ -224,6 +223,10 @@ songListElement.supportInfiniteScroll(() => {
 // "Interacting" state, implemented specifically for Hydra Media Center
 songListElement.supportInteractingState()
 songListElement.enterInteractingState()
+
+// since Elements automatically render upon injection in the DOM,
+// calling `render()` is always technically a *rerender*
+songListElement.render(options) // you can give options to render()
 
 // one-way text binding with child Elements
 songListElement.props.title = 'Hello'
@@ -252,8 +255,8 @@ this.props.listName = 'Playlist 1'
 Lowrider.js comes with a static method that can create web component instances
 with data pre-bound to them. This is especially useful when you have a
 parent-child relationship between two components, and the child is designed to
-spawn with data from the parent that cannot be stringified (functions, object
-refs, Element references, etc), or is too large to fit into an element attribute
+spawn with data from the parent that cannot be stringified (e.g., functions,
+object refs, Element refs), or is too large to fit into an element attribute
 when stringified.
 
 Usage:
@@ -287,8 +290,8 @@ childEl.speak() // "Help I'm alive"
      first render when the element was inserted, leaving your component
      partially rendered before rerendering, potentially creating an undesired
      state.
-   - This anti-pattern is solved by the `Lowrider.elementFactory()`, which
-     you can use to pre-bind your data to the component.
+   - This anti-pattern is solved by `Lowrider.elementFactory()`, which you can
+     use to pre-bind your data to the component.
 - It is easy to accidentially create infinite loops by watching an attribute
   that triggers a render, and in the render setting/updating that attribute.
 
@@ -301,9 +304,9 @@ Lowrider.js, to save you from having to find out on your own after putting time 
   DOM's exist for a reason, and you should make sure you don't need one before
   adopting Lowrider.js.
   
-  Without a virtual DOM, your web component can only exist in the real DOM...
+  Without a virtual DOM, your web components can only exist in the real DOM...
   the one the user sees. If you want to have "background" components, you'll
-  need to hide them with CSS, and they can't execute code until they exist in
-  the DOM.
+  need to hide them with CSS, and they can't execute code or listen for events
+  until they exist in the real DOM.
 - Lowrider.js is designed for use with the light DOM and hasn't been tested with
   the Shadow DOM.
