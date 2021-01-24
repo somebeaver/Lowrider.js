@@ -174,6 +174,10 @@ prepared for you to cache your components by saving their **outerHTML**
 property. When you cache a component this way and reinject it, Lowrider.js will
 detect the existing innerHTML, and the `build` event will not trigger.
 
+This pattern means that the state of the component is preserved while it's not
+needed in the DOM. It means that you can confidently remove component instances
+and reinject them without worrying about losing data.
+
 Each component can use a custom render checker. Simply overwrite Lowrider.js's
 built in `shouldBuild()` method with your own when extending the Lowrider class
 and make sure your method returns a boolean.
