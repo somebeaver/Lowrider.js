@@ -10,7 +10,7 @@ It does this by providing methods for managing the **component lifecycle** and
 **component state**, which normalizes their behavior, providing you with a more
 predictable foundation upon which to build your components.
 
-Lowrider.js is not a framework. It's only job is to implement a few critical
+Lowrider.js is not a framework. Its only job is to implement a few critical
 core concepts.
 
 ## Component Lifecycle
