@@ -87,7 +87,7 @@ rerender-from-cache' cycle that is ready for complex logic to be built upon.
     the DOM, even when loading from cache.
   - The `spawn` event should not create any new inner HTML, or even attempt to
     interact with inner HTML.
-  - The `onSpawn` method can be used to register event handlers directly on
+  - The `onSpawn` hook can be used to register event handlers directly on
     the custom Element, to determine context, to load internal data, to
     register IPC listeners, MutationObservers, and more.
 - Real life example:
@@ -99,10 +99,10 @@ rerender-from-cache' cycle that is ready for complex logic to be built upon.
 #### `.onBuild()`
 - Usage:
   - The `build` event triggers after the `spawn` event has completed. Your
-    `onBuild` method should create the "body" of the instance by injecting inner
+    `onBuild` hook should create the "body" of the component by injecting inner
     HTML. Typically, HTML may come from a .html file on the local disk, from a
     XHR request, or may be statically typed within the class definition. This
-    method should always perform a "fresh" build and overwrite any preexisting
+    hook should always perform a "fresh" build and overwrite any preexisting
     inner HTML.
 - Solves these issues:
   - When loading cached components, it is necessary to maintain the state of the
@@ -110,7 +110,7 @@ rerender-from-cache' cycle that is ready for complex logic to be built upon.
     other logic. It also prevents needless network requests when we already have
     the data.
 - Tips:
-  - The `onBuild` method is the right place for the heaviest work of your
+  - The `onBuild` hook is the right place for the heaviest work of your
     component.
   - Do not register event handlers in the `onBuild` hook, because they won't
     fire on subsequent reloads of this instance from cache. Defer your event
@@ -129,7 +129,7 @@ rerender-from-cache' cycle that is ready for complex logic to be built upon.
     Elements have rendered (only when **all child custom Elements** extend
     `Lowrider`).
 - Solves these issues:
-  - One issue with web components face in the DOM is that when you use custom
+  - One issue that web components face in the DOM is that when you use custom
     Element "A" to inject custom Element "B", code execution within "A" does not
     wait for "B" to render *its own inner HTML*. The top-level
     `connectedCallback()` of "B" will have executed, but any subsequent Promises
@@ -159,14 +159,14 @@ rerender-from-cache' cycle that is ready for complex logic to be built upon.
   - This fires before the actual removal of the Element, so you still have
     access to its state.
 - Real life example:
-  - A todo list application would proabably omit this step (event handlers would
-    be automatically removed when those nodes are removed), but could use this
-    step to perform last second writes to the database to record data.
+  - A todo list application would proabably omit this hook (event handlers on
+    children would be automatically removed when those nodes are removed), but
+    could use this step to perform last second writes to the database to record
+    data.
 
 ## Component State
 
-(Hydra Media Center uses `hydra-ui-router` to perform the caching of Lowrider.js
-components.)
+##### (Hydra Media Center uses `hydra-ui-router` to perform the caching of Lowrider.js components.)
 
 Managing and maintaining a components state is a critical part of building an
 application. While Lowrider.js does not provide a built-in cache storage, it is
@@ -175,7 +175,7 @@ property. When you cache a component this way and reinject it, Lowrider.js will
 detect the existing innerHTML, and the `build` event will not trigger.
 
 Each component can use a custom render checker. Simply overwrite Lowrider.js's
-built in `shouldRender()` method with your own when extending the Lowrider class
+built in `shouldBuild()` method with your own when extending the Lowrider class
 and make sure your method returns a boolean.
 
 ## Usage example
@@ -243,10 +243,10 @@ object.**
 Example:
 
 ```javascript
-// in the inner HTML:
+// in the component's inner HTML:
 <p data-prop="listName"></p>
 
-// in the Element instance
+// in the component's onLoad hook; this will insert "Playlist 1" into the DOM
 this.props.listName = 'Playlist 1'
 ```
 
@@ -279,10 +279,10 @@ childEl.speak() // "Help I'm alive"
 ## Common Pitfalls
 
 - Do not try to inject an "empty" component, then on the next line call it's
-  `render(data)` function.
+  `render()` function.
    - You are actually rendering twice, and even if you lock down your
      component to not render unless it has that custom `data` given through
-     `render(data)`, you will run into issues when loading from the cache
+     `render()`, you will run into issues when loading from the cache
      because the `render()` function is not called at all, so you won't have
      your custom `data`.
    - Since Lowrider components wait for their children to render, you will
