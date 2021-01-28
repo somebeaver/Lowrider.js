@@ -190,10 +190,10 @@ import Lowrider from './Lowrider.js/'
 // create a class that extends the Lowrider class
 class SongList extends Lowrider {
   // you can implement these methods
-  onSpawn(renderOpts) {}
-  onBuild(renderOpts) {}
-  onLoad(renderOpts) {}
-  onRemoved(renderOpts) {}
+  onSpawn() {}
+  onBuild() {}
+  onLoad() {}
+  onRemoved() {}
   shouldBuild() {}
 }
 
