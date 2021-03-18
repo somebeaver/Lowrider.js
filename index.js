@@ -62,6 +62,29 @@ export default class Lowrider extends HTMLElement {
   }
 
   /**
+   * Returns a new proxied object for use in this.props.
+   * 
+   * @returns {object}
+   */
+  _newPropsProxiedObject() {
+    let newProxiedObject = {}
+
+    let handlers = {
+      'set': (target, key, newValue) => {
+        target[key] = newValue
+
+        for (let child of this.querySelectorAll(`[data-prop="${key}"]`)) {
+          child.innerHTML = newValue
+        }
+        
+        return true
+      }
+    }
+
+    return new Proxy(newProxiedObject, handlers)
+  }
+
+  /**
    * Spawns the instance "brains". The spawn event always triggers, regardless
    * of wehether the Element needs to also render.
    * 
@@ -172,6 +195,14 @@ export default class Lowrider extends HTMLElement {
     }, 0)
 
     this.rendered = true
+  }
+
+  /**
+   * Unlocks a web component.
+   */
+  unlock() {
+    this.locked = false
+    this.removeAttribute('locked')
   }
 
   /**
@@ -370,34 +401,52 @@ export default class Lowrider extends HTMLElement {
   }
 
   /**
-   * Unlocks a web component.
-   */
-  unlock() {
-    this.locked = false
-    this.removeAttribute('locked')
-  }
-
-  /**
-   * Returns a new proxied object for use in this.props.
+   * Enables drop listeners on this instnace. This is for recieving drops from
+   * outside of the Electron app, **not** HTML5 drag-n-drop.
    * 
-   * @returns {object}
+   * Automatically toggles the class "drop-hovering" when the user is hoving
+   * over the instance while dragging something with the mouse.
+   * 
+   * @param {(Element|function)} [innerEl] - Optionally use a child Element
+   * instead of the entire Lowrider Element. Can also be the onDrop arg.
+   * @param {function} onDrop - Callback triggered when a drop is recievd. The
+   * callback will recieve the event as the first arg, and the dropped items as
+   * the second arg.
    */
-  _newPropsProxiedObject() {
-    let newProxiedObject = {}
+  enableDropArea(innerEl, onDrop) {
+    let el = this
+    let onDropCb
 
-    let handlers = {
-      'set': (target, key, newValue) => {
-        target[key] = newValue
-
-        for (let child of this.querySelectorAll(`[data-prop="${key}"]`)) {
-          child.innerHTML = newValue
-        }
-        
-        return true
-      }
+    if (innerEl instanceof Element) {
+      el = innerEl
+      onDropCb = onDrop
+    } else {
+      onDropCb = innerEl
     }
 
-    return new Proxy(newProxiedObject, handlers)
+    el.addEventListener('dragover', (event) => {
+      event.preventDefault()
+    })
+
+    el.addEventListener('dragenter', (event) => {
+      event.preventDefault()
+      el.classList.add('drop-hovering')
+    })
+
+    el.addEventListener('dragleave', (event) => {
+      event.preventDefault()
+      el.classList.remove('drop-hovering')
+    })
+
+    el.addEventListener('drop', (event) => {
+      let droppedItems = event.dataTransfer.files
+  
+      el.classList.remove('drop-hovering')
+      
+      if (typeof onDropCb === 'function') {
+        onDropCb(event, droppedItems)
+      }
+    })
   }
 
   /**
