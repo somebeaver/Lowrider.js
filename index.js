@@ -503,4 +503,19 @@ export default class Lowrider extends HTMLElement {
 
     return el
   }
+
+  /**
+   * Registers a custom Element with CustomElementRegistry.
+   * 
+   * @param {string} name - The Element tag, e.g., `custom-list`.
+   * @param {object} implementation - The class implementation of the Element.
+   */
+  static register(name, implementation) {
+    if (window.customElements.get(name) !== undefined) {
+      console.warn(`Custom Element ${name} is already defined`)
+      return
+    }
+
+    window.customElements.define(name, implementation)
+  }
 }
