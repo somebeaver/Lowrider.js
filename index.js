@@ -166,20 +166,21 @@ export default class Lowrider extends HTMLElement {
   }
 
   /**
-   * Calls the `onRemoved` handler first, then performs a full render, which
-   * triggers the `onSpawn`, `onBuild`, and `onLoad` handlers. This will not
+   * Performs a render on an existing Element by calling the `onRemoved` handler
+   * first, then `spawn()`, `build()`, and `load()` handlers. This will not
    * actually reinject the Element instance, which means that existing event
    * handlers on the component itself will be preserved.
-   * 
-   * Note: since this calls `onRemoved` first, the name 'render' for this may seem
-   * counterintuitive, becuause 'render' implies a fresh creation, but this only
-   * works when there's an old instance to *re*render. 
-   * 
+   *
+   * Technically, this is always a *re*render, since one cannot call this
+   * without the Element existing in the first place (as in, already rendered).
+   *
    * @param {*} [opts] - Optionally give any argument, and that argument will be
    * given to `onSpawn`, `onBuild`, and `onLoad`.
    */
   async render(opts) {
     if (this.locked) return
+
+    this.rendered = false
 
     if ('onRemoved' in this) {
       await this.onRemoved()
@@ -190,7 +191,7 @@ export default class Lowrider extends HTMLElement {
 
     setTimeout(() => {
       if ('onLoad' in this) {
-        this.onLoad(opts)
+        this.load(opts)
       }
     }, 0)
 
@@ -326,7 +327,7 @@ export default class Lowrider extends HTMLElement {
    * with the Element, this function will set the interacting state for the Element. This can also
    * be invoked manually.
    * 
-   * An event listener will be added to the fullsize-app that determines when the user is done
+   * An event listener will be added to the music-app that determines when the user is done
    * interacting with the Element. The Element remains in the interacting state while the user
    * uses the context-menu, or tabs between child Elements.
    */
@@ -383,8 +384,8 @@ export default class Lowrider extends HTMLElement {
       }
 
       // event must have been outside the Element, exit the interacting state
-      document.querySelector('fullsize-app').removeEventListener('mouseup', parentEl._checkIfDoneInteracting)
-      document.querySelector('fullsize-app').removeEventListener('keyup', parentEl._checkIfDoneInteracting)
+      document.querySelector('music-app').removeEventListener('mouseup', parentEl._checkIfDoneInteracting)
+      document.querySelector('music-app').removeEventListener('keyup', parentEl._checkIfDoneInteracting)
       parentEl.classList.remove(this.interactingClassName)
       parentEl._checkIfDoneInteracting = null
 
@@ -396,8 +397,8 @@ export default class Lowrider extends HTMLElement {
 
     // enter interacting state by adding a class and registering event handlers
     parentEl.classList.add(this.interactingClassName)
-    document.querySelector('fullsize-app').addEventListener('mouseup', parentEl._checkIfDoneInteracting)
-    document.querySelector('fullsize-app').addEventListener('keyup', parentEl._checkIfDoneInteracting)
+    document.querySelector('music-app').addEventListener('mouseup', parentEl._checkIfDoneInteracting)
+    document.querySelector('music-app').addEventListener('keyup', parentEl._checkIfDoneInteracting)
   }
 
   /**
