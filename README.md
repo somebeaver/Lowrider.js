@@ -5,11 +5,10 @@
 
 **Lowrider.js** is a JavaScript library that aims to simplify working with [Web
 Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components) in a
-completely vanilla environment.
-
-Specifically, it implements a **[component lifecycle](#component-lifecycle)**
-that makes Web Components more reusable and flexible, especially when being used
-together to create a single-page application.
+completely vanilla environment. Specifically, it implements a **[component
+lifecycle](#component-lifecycle)** that makes Web Components more flexible and
+reusable, especially when being used together to create a single-page
+application.
 
 Lowrider.js also provides unopinionated functionality for building single-page
 applications, such as HTML5 drag-and-drop, infinite scroll, content caching,
