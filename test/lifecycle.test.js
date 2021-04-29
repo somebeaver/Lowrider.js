@@ -1,5 +1,5 @@
 import Lowrider from '../index.js'
-import { output } from './es6-test-tools.js'
+import { output } from './es6-test-tools.js' 
 
 // register a few test components
 Lowrider.register('test-element-1', class TestElement1 extends Lowrider {

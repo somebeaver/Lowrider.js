@@ -62,7 +62,7 @@ export default class Lowrider extends HTMLElement {
   }
 
   /**
-   * Returns a new proxied object for use in this.props.
+   * Returns a new proxied object for use in this.props. 
    * 
    * @returns {object}
    */

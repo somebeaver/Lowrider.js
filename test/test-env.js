@@ -4,7 +4,7 @@ const express = require('express')
 const app = express()
 const publicDir = path.normalize(__dirname + '/../')
 
-console.log(publicDir)
+console.log(publicDir) 
 
 app.use(express.static(publicDir))
 
