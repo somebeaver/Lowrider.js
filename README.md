@@ -1,7 +1,7 @@
 # Lowrider.js
 
 *To see Lowrider.js in action, check out the
-[Cardinal apps](https://cardinalapps.xyz).*
+[Cardinal apps](https://cardinalapps.xyz).* 
 
 **Lowrider.js** is a ES6 JavaScript library that enhances [Web
 Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components) and
