@@ -1,6 +1,12 @@
 {
   "name": "lowrider.js",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "somebeaver",
-  "private": true
+  "private": true,
+  "scripts": {
+    "test": "./test/test-env.js"
+  },
+  "devDependencies": {
+    "express": "^4.17.1"
+  }
 }

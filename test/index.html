@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head lang="en">
+    <title>Lowrider.js Tests</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      #output {
+        padding: 10px;
+        max-height: 70vh;
+        overflow-y: scroll;
+        background: #eee;
+      }
+
+      .te {
+        display: inline;
+        padding: 3px;
+        border-radius: 4px;
+        white-space: nowrap;
+      }
+
+      .te._1 {background: rgb(189, 146, 135);}
+      .te._1:before {content: 'test-element-1'}
+
+      .te._2 {background: rgb(158, 135, 189);}
+      .te._2:before {content: 'test-element-2'}
+
+      .te._3 {background: rgb(135, 178, 189);}
+      .te._3:before {content: 'test-element-3'}
+
+      .te._4 {background: rgb(135, 189, 135);}
+      .te._4:before {content: 'test-element-4'}
+
+      ul {
+        margin-bottom: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="runner"></div>
+
+    <div id="output"></div>
+
+    <script src="test/lifecycle.test.js" type="module"></script>
+  </body>
+</html>
