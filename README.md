@@ -51,8 +51,8 @@ should always be async functions.
 For each lifecycle event, there is a hook.
 
 1. `onSpawn`
-  - Use the onSpawn() hook to perform initial setup tasks with the upwards DOM and self.
-  - Example tasks: registering event handlers or mutation observers on self;
+  - Use the onSpawn() hook to perform initial setup tasks with the upwards DOM and itself.
+  - Example tasks: registering event handlers or mutation observers on itself;
     initializing statically typed component data; logic to determine what to
     render.
   - **Do not** insert innerHTML, do not look downward in the DOM, do not perform
@@ -61,7 +61,7 @@ For each lifecycle event, there is a hook.
 2. `onBuild`
   - Use the onBuild() hook to perform the heavy lifting of the component's
     rendering process. This step is skipped when the component is loaded with
-    cached internals. This will maintain component state.
+    cached internals. Doing this will maintain component state.
   - Example tasks: fetch remote data; big loops.
   - **Do not** initialize new internal properties.
   - **Do** overwrite component internals every time.
@@ -100,8 +100,8 @@ Once a Web Component has been registered with the document, instances of it can
 be created. Typically, this is done by simply inserting it into the DOM, and doing so
 will trigger the rendering process.
 
-Elements can be inserted naked, with attributes, and inner HTML. When an Element
-is inserted with innerHTML, Lowrider.js assumed it is being loaded with cached
+Elements can be inserted naked, with attributes, and/or with inner HTML. When an Element
+is inserted with inner HTML, Lowrider.js assumes it is being loaded with cached
 content, and the **build** event will **not** trigger.
 
 One drawback with creating Elements this way is that attributes can only hold a
@@ -196,7 +196,7 @@ myElement.render()
 ```
 
 Under the hood, `render()` will call this instance's `onRemoved` hook, then
-trigger the `spawn`, `build`, and `load` events (which triggers their hooks).
+trigger the `spawn`, `build` (maybe), and `load` events (which triggers their hooks).
 
 ### Build Determiner (`shouldBuild()`)
 
