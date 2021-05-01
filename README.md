@@ -60,15 +60,15 @@ bunch of nested HTML is inserted at once. Follow the numbers to follow the order
 of events. Events surrounded by `~` sqigglies denote a skipped event.
 
 ```html
-<zoo-animals>                   (1-spawn), ~(7-build)~, (13-load)
-    <zoo-enclosure>             (2-spawn), ~(8-build)~, (14-load)
-        <zoo-pond>              (3-spawn), ~(9-build)~, (15-load)
-          <zoo-fish></zoo-fish> (4-spawn), (10-build), (16-load)
+<zoo-animals>                     (1-spawn), ~(7-build)~, (13-load)
+    <zoo-enclosure>               (2-spawn), ~(8-build)~, (14-load)
+        <zoo-pond>                (3-spawn), ~(9-build)~, (15-load)
+          <zoo-fish></zoo-fish>   (4-spawn),  (10-build), (16-load)
         </zoo-pond>
     </zoo-enclosure>
 
-    <zoo-goat></zoo-goat>       (5-spawn), (11-build), (17-load)
-    <zoo-owl></zoo-owl>         (6-spawn), (12-build), (18-load)
+    <zoo-goat></zoo-goat>         (5-spawn), (11-build), (17-load)
+    <zoo-owl></zoo-owl>           (6-spawn), (12-build), (18-load)
 </zoo-animals>
 ```
 
