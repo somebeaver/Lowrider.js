@@ -233,7 +233,7 @@ If the component is removed from memory, how can it come back in the same state?
 The answer is a mix of Lowrider.js features and component authoring patterns.
 
 The job of the caching module is to preserve a component by saving its
-`outerHTML` property. It's crucial to save its attributes and its innter HTML.
+`outerHTML` property. It's crucial to save its attributes and its inner HTML.
 Together, they *are* the state, and a properly authored component should be able
 to initialize itself using that state, or from scratch. It is up to the
 developer to ensure that they don't create any important Element object
