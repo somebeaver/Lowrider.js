@@ -170,8 +170,13 @@ function reference to `<my-element>` that it has access to on spawn.
 ### Statically Typed Creation
 
 ```javascript
+// naked, no cache
 document.body.innerHTML = '<my-element></my-element>'
+
+// with attributes
 document.body.innerHTML = '<my-element example-attr="hello"></my-element>'
+
+// with cached contents
 document.body.innerHTML = `<my-element>
                              <div class="foo">
                                <div></div>
