@@ -11,7 +11,7 @@ makes web components more flexible and reusable, especially when using many
 together to create complex UI's.
 
 Lowrider.js also provides unopinionated functionality for building web based
-applications, such as component state**, **component caching, HTML5
+applications, such as component state, component caching, HTML5
 drag-and-drop, infinite scroll, content rendering, data binding, Element
 creation, and more.
 
@@ -45,7 +45,7 @@ for a virtual DOM**.
 **Together, steps 1, 2, and 3 make up the "rendering process" that all
 components immediately go through when inserted into the DOM.**
 
-Lowrider.js provides a `render()` method, but since web components
+*Note:* Lowrider.js provides a `render()` method, but since web components
 automatically render themselves upon DOM insertion, the method does not need to be
 invoked unless you want to *re*render. See more on the [render method](#render).
 
