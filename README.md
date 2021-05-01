@@ -78,8 +78,27 @@ The main takeaways here are that:
    `zoo-animals` should not look into its own HTML because its child components
    are not guarenteed to have rendered yet.
 2. `build` events of components with existing HTML on DOM insertion are assumed
-   to be using their cached contents from a prior build, and so the `build`
+   to be using their cached contents from a prior build, so their `build`
    event is skipped so as to not overwirte the cache.
+
+### Async Operations in the Build Step
+
+Components often need to fetch data from an API or some sort of local storage,
+which can add significant loading time to an `onBuild()` hook.
+
+Lowrider.js is optimized for slow async operations in `onBuild()`. No matter how
+long it takes to finish `onBuild()`, that component's `onLoad()` will always
+come after, **and no other component will be blocked from rendering**.
+
+Since any component can, during its `onBuild()` hook, add arbitrary HTML to the
+document, it's impossible to look downwards and know when the loading of any
+individual component nest is complete until it is *actually* complete (which is
+still debateable).
+
+When two components have a parent-child relationship, the parent should create
+the child Element during its `onBuild()` hook, which ensures that the child's
+`onBuild()` hook can rely on the parent for data that was initialized earlier in
+the parent's rendering process.
 
 ## Hooks
 
@@ -91,9 +110,8 @@ For each lifecycle event, there is a hook.
 1. **`onSpawn`**
   - Use the onSpawn() hook to perform initial setup tasks with the upwards DOM and itself.
   - Example tasks: registering event handlers or mutation observers on itself;
-    initializing statically typed component data; logic to determine what to
-    render.
-  - **Do not** insert innerHTML, do not look downward in the DOM, do not perform
+    initial component setup.
+  - **Do not** insert inner HTML, do not look downward in the DOM, do not perform
     expensive tasks.
   - **Do** keep this hook as lightweight as possible.
 2. **`onBuild`**
@@ -102,7 +120,7 @@ For each lifecycle event, there is a hook.
     cached internals. Doing this will maintain component state.
   - Example tasks: fetch remote data; big loops.
   - **Do not** initialize new internal properties.
-  - **Do** overwrite component internals every time.
+  - **Do** overwrite inner HTML on each build.
 3. **`onLoad`**
   - Use the onLoad() hook to perform after-build tasks and to interact with
     child HTML and components. This hook should be designed to work with the
@@ -182,6 +200,33 @@ childEl.speak()
 The factory is designed to be used to create Lowrider.js components, but can
 also be used to create standard HTML Elements (`div`, `span`, etc)
 
+## Caching
+
+Since web components cannot exist outside of the DOM, the components themselves
+cannot be tasked with caching their own contents. Instead, that responsibility
+typically falls to the UI's router, a purpose built module, or simply the
+browser if there is no single-page application context.
+
+Lowrider.js is flexible and can work with anything that can stringify HTML. As
+long as the component author utilizes the lifecycle hooks properly, Lowrider.js
+components can dissappear from the DOM and memory, then reappear as if they
+never left at all. Of course, while they're gone, their code won't execute.
+
+Lowrider.js was designed for use with
+[router.js](https://github.com/somebeaver/router.js), an open source
+unopinionated UI router for single-page applications written by the same author,
+and optimized for use with Lowrider.js.
+
+### But Really, Where Does the State Go?
+
+If the component is removed from memory, how can it come back in the same state?
+The answer is a mix of Lowrider.js features and component authoring patterns.
+
+The job of the caching module is to preserve a component by saving its
+`outerHTML` property. It's crucial to save its attributes and its innter HTML.
+Together, they *are* the state, and a properly authored component should be able
+to initialize itself using that state, or from scratch.
+
 ## Using the `props` Property
 
 Lowrider.js components come with a property called `props`. This property is an
@@ -202,24 +247,7 @@ Example:
 this.props.listName = 'Playlist 1'
 ```
 
-## Caching
-
-Since web components cannot exist outside of the DOM, the components themselves
-cannot be tasked with caching their own contents. Instead, that responsibility
-typically falls to the UI's router, a purpose built module, or simply the
-browser if there is no single-page application context.
-
-Lowrider.js is flexible and can work with anything that can stringify HTML. As
-long as the component author utilizes the lifecycle hooks properly, Lowrider.js
-components can dissappear from the DOM and memory, then reappear as if they
-never left at all. Of course, while they're gone, their code won't execute.
-
-Lowrider.js was designed for use with
-[router.js](https://github.com/somebeaver/router.js), an open source
-unopinionated UI router for single-page applications written by the same author,
-and optimized for use with Lowrider.js.
-
-## Features
+## Other Features
 
 ### Render
 
@@ -324,3 +352,15 @@ async onLoad() {
   })
 }
 ```
+
+## Testing
+
+You need `npm` and Node.js to run Lowrider.js tests.
+
+To start an Express server that delivers the test suite to a browser, run:
+
+```
+$ npm run ./test/test-env.js
+```
+
+Then navigate to `http://localhost:3000` in any browser.
