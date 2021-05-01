@@ -81,7 +81,7 @@ The main takeaways here are that:
    to be using their cached contents from a prior build, so their `build`
    event is skipped so as to not overwirte the cache.
 
-### Async Operations in the Build Step
+#### Async Operations in the Build Step
 
 Components often need to fetch data from an API or some sort of local storage,
 which can add significant loading time to an `onBuild()` hook.
