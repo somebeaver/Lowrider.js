@@ -264,10 +264,10 @@ this.props.listName = 'Playlist 1'
 
 ### Render
 
-Lowrider.js provides a render function that allows to be rerendered. Calling
-this is always technically a *re*render, and it will not remove the instance
-from the DOM. This is to preserve event handlers and observers that may have
-been attached to the element itself by external components.
+Lowrider.js provides a render function that allows components to be rerendered.
+Calling this is always technically a *re*render, and it will not remove the
+instance from the DOM. This is to preserve event handlers and observers that may
+have been attached to the element itself by external components.
 
 ```javascript
 myElement.render()
