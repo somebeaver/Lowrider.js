@@ -142,6 +142,7 @@ so. Your class must always extend Lowrider.
 ```javascript
 import Lowrider from 'Lowrider.js'
 
+// the humble beginnings of all Lowrider.js components
 Lowrider.register('my-element', class MyElement extends Lowrider {
   async onSpawn() {}
   async onBuild() {}
