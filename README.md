@@ -30,14 +30,21 @@ automatically manages these events to **maintain component state** and
 #### Lifecycle Events
 
 0. *An instance of the web component (custom element) is inserted into the DOM.*
-1. `spawn` - The web component knows of its own existance but has not yet rendered.
-2. `build` - The web component should build itself (i.e., query an API, inject inner HTML).
-3. `load` - The web component's inner HTML has rendered, **and all child web
-   components have spawned**.
+1. `spawn` - Immediately, the `spawn` event fires. The web component knows of
+   its own existance and the document in which it lives.
+2. `build` - Immediately after spawning is completed, the component enters the
+   `build` lifecycle event. It should now build itself (i.e., query an
+   API, inject inner HTML, spawn more components). This step is **skipped** when
+   using a cached component.
+3. `load` - One event loop tick after building is completed, the component enters
+   the `load` lifecycle event. All child web components injected during the
+   build will have had their `spawn` events triggered before this component's
+   load. The component now waits for user interaction or DOM removal.
 4. `removed` - Final moments before the instance is removed from the DOM **and
    memory**.
 
-Together, steps 1, 2, and 3 make up the "rendering process".
+Together, steps 1, 2, and 3 make up the **"rendering process"** that all
+components immediately go through when inserted into the DOM.
 
 Lowrider.js provides a `render()` method, but since web components
 automatically render themselves upon DOM insertion, the method does not need to be
