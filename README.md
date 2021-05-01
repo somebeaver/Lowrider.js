@@ -143,12 +143,15 @@ so. Your class must always extend Lowrider.
 import Lowrider from 'Lowrider.js'
 
 Lowrider.register('my-element', class MyElement extends Lowrider {
-  async onSpawn() { console.log("Help I'm alive!") }
+  async onSpawn() {}
   async onBuild() {}
   async onLoad() {}
   async onRemoved() {}
 })
 ```
+
+Components only need to be registered once, then can be used in the DOM. Trying
+to register a component that was already registered will result in an error.
 
 ## Creating Component Instances
 
