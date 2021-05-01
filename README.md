@@ -19,13 +19,13 @@ creation, and more.
 
 Web component instances begin existing at DOM insertion and stop existing at DOM
 removal. Everything that happens in between is the lifecycle. Understanding and
-reacting to lifecycle events with **[hooks](#hooks)** is crucial to creating
-efficent Lowrider.js components.
+reacting to **[Lifecycle events](#lifecycle-events)** with **[hooks](#hooks)**
+is crucial to creating efficent Lowrider.js components.
 
-**[Lifecycle events](#lifecycle-events)** are the normal stages of life that
-all Elements go through while in the DOM. Lowrider.js's true power is in how it
-automatically manages these events to **maintain component state** and
-**optimize rendering**.
+Lifecycle events can only happen while the component exists in the DOM.
+Lowrider.js's true power is in how it automatically manages these events to
+**maintain component state** and **optimize rendering**, and **remove the need
+for a virtual DOM**.
 
 #### Lifecycle Events
 
