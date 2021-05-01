@@ -156,7 +156,7 @@ to register a component that was already registered will result in an error.
 ## Creating Component Instances
 
 Once a web component has been registered with the document, instances of it can
-be created. Typically, this is done by simply inserting it into the DOM, and doing so
+be created. Typically, this is done by inserting it into the DOM, and doing so
 will trigger the rendering process.
 
 Elements can be inserted naked, with attributes, and/or with inner HTML. When an Element
@@ -205,8 +205,8 @@ someElement.appendChild(childEl)
 childEl.speak()
 ```
 
-The factory is designed to be used to create Lowrider.js components, but can
-also be used to create standard HTML Elements (`div`, `span`, etc)
+The factory is designed to be used to create Lowrider.js components, but
+can also be used to create standard HTML Elements (`div`, `span`, etc).
 
 ## Caching
 
@@ -225,7 +225,7 @@ Lowrider.js was designed for use with
 unopinionated UI router for single-page applications written by the same author,
 and optimized for use with Lowrider.js.
 
-### But Really, Where Does the State Go?
+#### But Really, Where Does the State Go?
 
 If the component is removed from memory, how can it come back in the same state?
 The answer is a mix of Lowrider.js features and component authoring patterns.
