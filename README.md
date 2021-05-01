@@ -3,11 +3,11 @@
 *To see Lowrider.js in action, check out the
 [Cardinal apps](https://cardinalapps.xyz).* 
 
-**Lowrider.js** is a ES6 JavaScript library that enhances [Web
+**Lowrider.js** is a small ES6 JavaScript library that enhances [Web
 Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components) and
-makes them **better building blocks in a completely vanilla environment**. Specifically,
+makes them better building blocks in a completely vanilla environment. Specifically,
 Lowrider.js implements a **[component lifecycle](#component-lifecycle)** that
-makes Web Components more flexible and reusable, especially when using many
+makes web components more flexible and reusable, especially when using many
 together to create complex UI's.
 
 Lowrider.js also provides unopinionated functionality for application centric
@@ -15,6 +15,7 @@ features, such as **component state**, **component caching**, HTML5
 drag-and-drop, infinite scroll, content rendering, data binding, Element
 creation, and more.
 
+## Lifecycle
 
 A Web Component's life begins at DOM insertion and ends at DOM removal.
 Everything that happens in between is the lifecycle. Understanding and reacting
