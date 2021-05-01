@@ -17,10 +17,10 @@ creation, and more.
 
 ## Lifecycle
 
-Web component instances begin existing at DOM insertion and stop existing at DOM
+Each web component instance begins existing at DOM insertion and stop existing at DOM
 removal; everything that happens in between is the lifecycle. Understanding and
 reacting to **[lifecycle events](#lifecycle-events)** with **[hooks](#hooks)**
-is crucial to creating efficent Lowrider.js components.
+is key to creating efficent Lowrider.js components.
 
 Lifecycle events can only happen while the component exists in the DOM.
 Lowrider.js's true power is in how it automatically manages these events to
@@ -49,6 +49,38 @@ components immediately go through when inserted into the DOM.**
 automatically render themselves upon DOM insertion, the method does not need to be
 invoked unless you want to *re*render. See more on the [render method](#render).
 
+## Order of Events
+
+Lowrider.js takes a top-down approach to UI rendering. No matter how deeply
+nested in the HTML, every Lowrider.js component acts predictably and
+consistently.
+
+The following example shows the order in which lifecycle events fire when a
+bunch of nested HTML is inserted at once. Follow the numbers to follow the order
+of events. Events with `~` sqigglies areound it denote a skipped event.
+
+```html
+<zoo-animals> (1-spawn), ~(7-build)~, (13-load)
+    <zoo-enclosure> (2-spawn), ~(8-build)~, (14-load)
+        <zoo-pond> (3-spawn), ~(9-build)~, (15-load)
+          <zoo-fish></zoo-fish> (4-spawn), (10-build), (16-load)
+        </zoo-pond>
+    </zoo-enclosure>
+
+    <zoo-goat></zoo-goat> (5-spawn), (11-build), (17-load)
+    <zoo-owl></zoo-owl> (6-spawn), (12-build), (18-load)
+</zoo-animals>
+```
+
+The main takeaways here are that:
+
+1. Elements are rendered top-down, meaning that when at step `(1-spawn)`,
+   `zoo-animals` should not look into its own HTML because its child components
+   are not guarenteed to have rendered yet.
+2. `build` events of components with existing HTML on DOM insertion are assumed
+   to be using their cached contents from a prior build, and so the `build`
+   event is skipped so as to not overwirte the cache. 
+
 ## Hooks
 
 Hooks are called by Lowrider.js when certain lifecycle events happen. Hooks
@@ -56,7 +88,7 @@ should always be async functions.
 
 For each lifecycle event, there is a hook.
 
-1. `onSpawn`
+1. **`onSpawn`**
   - Use the onSpawn() hook to perform initial setup tasks with the upwards DOM and itself.
   - Example tasks: registering event handlers or mutation observers on itself;
     initializing statically typed component data; logic to determine what to
@@ -64,21 +96,21 @@ For each lifecycle event, there is a hook.
   - **Do not** insert innerHTML, do not look downward in the DOM, do not perform
     expensive tasks.
   - **Do** keep this hook as lightweight as possible.
-2. `onBuild`
+2. **`onBuild`**
   - Use the onBuild() hook to perform the heavy lifting of the component's
     rendering process. This step is skipped when the component is loaded with
     cached internals. Doing this will maintain component state.
   - Example tasks: fetch remote data; big loops.
   - **Do not** initialize new internal properties.
   - **Do** overwrite component internals every time.
-3. `onLoad`
+3. **`onLoad`**
   - Use the onLoad() hook to perform after-build tasks and to interact with
     child HTML and components. This hook should be designed to work with the
     component in any state, as the component may have been loaded with cached
     contents
   - Example tasks: event handlers on child web componets, trigger animations,
     analyze and react to built state.
-4. `onRemoved`
+4. **`onRemoved`**
   - Use the onRemoved() hook to react to a removal event. The removal cannot be
     stopped. The component will be removed from the DOM and from memory.
   - Example tasks: remove event listeners, save data.
