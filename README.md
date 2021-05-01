@@ -11,7 +11,7 @@ makes web components more flexible and reusable, especially when using many
 together to create complex UI's.
 
 Lowrider.js also provides unopinionated functionality for building web based
-applications, such as **component state**, **component caching**, HTML5
+applications, such as component state**, **component caching, HTML5
 drag-and-drop, infinite scroll, content rendering, data binding, Element
 creation, and more.
 
@@ -36,15 +36,14 @@ for a virtual DOM**.
    `build` lifecycle event. It should now build itself (i.e., query an
    API, inject inner HTML, spawn more components). This step is **skipped** when
    using a cached component.
-3. **`load`** - One event loop tick after building is completed, the component enters
-   the `load` lifecycle event. All child web components injected during the
-   build will have had their `spawn` events triggered before this component's
-   load. The component now waits for user interaction or DOM removal.
-4. **`removed`** - Final moments before the instance is removed from the DOM **and
+3. **`load`** - One event loop tick after building is completed, the component
+   enters the `load` lifecycle event. It should now interact with its child
+   HTML, then wait for user interaction or DOM removal.
+4. **`removed`** - Final moments before the component is removed from the DOM **and
    memory**.
 
-Together, steps 1, 2, and 3 make up the **"rendering process"** that all
-components immediately go through when inserted into the DOM.
+**Together, steps 1, 2, and 3 make up the "rendering process" that all
+components immediately go through when inserted into the DOM.**
 
 Lowrider.js provides a `render()` method, but since web components
 automatically render themselves upon DOM insertion, the method does not need to be
