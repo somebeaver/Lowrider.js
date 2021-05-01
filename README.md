@@ -88,7 +88,8 @@ which can add significant loading time to an `onBuild()` hook.
 
 Lowrider.js is optimized for slow async operations in `onBuild()`. No matter how
 long it takes to finish `onBuild()`, that component's `onLoad()` will always
-come after, **and no other component will be blocked from rendering**.
+come after, **and no other component will be blocked from rendering, including
+child components that have already been inserted**.
 
 Since any component can, during its `onBuild()` hook, add arbitrary HTML to the
 document, it's impossible to look downwards and know when the loading of any
