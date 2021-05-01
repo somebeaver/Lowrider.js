@@ -164,9 +164,8 @@ Elements can be inserted naked, with attributes, and/or with inner HTML. When an
 is inserted with inner HTML, Lowrider.js assumes it is being loaded with cached
 content, and the **build** event will **not** trigger.
 
-One drawback with creating Elements this way is that attributes can only hold a
-limited amount of stringified data. For example, it's not possible to pass a
-function reference to `<my-element>` that it has access to on spawn.
+Statically typed Elements can cover 99% of use cases, but are limited by the
+fact that HTML attributes can only hold maximum amount of stringified data.
 
 ### Statically Typed Creation
 
@@ -185,7 +184,8 @@ document.body.innerHTML = `<my-element>
                            </my-element>`
 ```
 
-To solve this, Lowrider.js components can also be created programatically using the
+As such, it's not possible to pass a function reference to `<my-element>` that
+it has access to on spawn. To solve this, Lowrider.js components can also be created programatically using the
 the static method `Lowrider.elementFactory()`. This method can be used to attach
 arbitrary data to the Element before it even spawns.
 
