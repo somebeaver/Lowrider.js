@@ -233,7 +233,10 @@ The answer is a mix of Lowrider.js features and component authoring patterns.
 The job of the caching module is to preserve a component by saving its
 `outerHTML` property. It's crucial to save its attributes and its innter HTML.
 Together, they *are* the state, and a properly authored component should be able
-to initialize itself using that state, or from scratch.
+to initialize itself using that state, or from scratch. It is up to the
+developer to ensure that they don't create any important Element object
+properties that get lost when the instance is removed; instead, make sure those
+things are saved as attributes.
 
 ## Using the `props` Property
 
@@ -251,7 +254,7 @@ Example:
 // in the component's inner HTML:
 <p data-prop="listName"></p>
 
-// in the component's onLoad hook; this will insert "Playlist 1" into the DOM
+// in the component's onLoad() hook; this will insert "Playlist 1" into the DOM
 this.props.listName = 'Playlist 1'
 ```
 
@@ -259,11 +262,10 @@ this.props.listName = 'Playlist 1'
 
 ### Render
 
-Lowrider.js provides a render function that allows other components to rerender
-other components. Calling this is always technically a *re*render, and it will
-not remove the instance from the DOM. This is to preserve event handlers and
-observers that may have been attached to the element itself by external
-components.
+Lowrider.js provides a render function that allows to be rerendered. Calling
+this is always technically a *re*render, and it will not remove the instance
+from the DOM. This is to preserve event handlers and observers that may have
+been attached to the element itself by external components.
 
 ```javascript
 myElement.render()
@@ -303,14 +305,13 @@ async onSpawn() {
 }
 ```
 
-Caution! Calling 'render()` in a watched attribute will result in an infinite
+*Caution!* Calling `render()` in a watched attribute will result in an infinite
 loop.
 
 ### Infinite Scroll
 
 ```javascript
 async onSpawn() {
-  // (args are omitted in this example)
   this.supportInfiniteScroll(() => {
     console.log('user scrolled to near the bottom of this element')
   })
