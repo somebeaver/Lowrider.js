@@ -37,8 +37,8 @@ for a virtual DOM**.
    API, inject inner HTML, spawn more components). This step is **skipped** when
    using a cached component.
 3. **`load`** - One event loop tick after building is completed, the component
-   enters the `load` lifecycle event. It should now interact with its child
-   HTML, then wait for user interaction or DOM removal.
+   enters the `load` lifecycle event. It can now manipulate its child
+   HTML, and then should wait for user interaction or DOM removal.
 4. **`removed`** - Final moments before the component is removed from the DOM **and
    memory**.
 
