@@ -47,7 +47,7 @@ components immediately go through when inserted into the DOM.**
 
 *Note:* Lowrider.js provides a `render()` method, but since web components
 automatically render themselves upon DOM insertion, the method does not need to be
-invoked unless you want to *re*render. See more on the [render method](#render).
+invoked unless you want to *re*render. More on the [render method](#render).
 
 ## Order of Events
 
