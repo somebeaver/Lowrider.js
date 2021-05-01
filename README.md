@@ -80,6 +80,10 @@ The main takeaways here are that:
 2. `build` events of components with existing HTML on DOM insertion are assumed
    to be using their cached contents from a prior build, so their `build`
    event is skipped so as to not overwirte the cache.
+3. When two components have a parent-child relationship, the parent should create
+   the child Element during its `onBuild()` hook, which ensures that the child's
+   `onBuild()` hook can rely on the parent for data that was initialized earlier
+   in the parent's rendering process.
 
 #### Async Operations in the Build Step
 
@@ -95,11 +99,6 @@ Since any component can, during its `onBuild()` hook, add arbitrary HTML to the
 document, it's impossible to look downwards and know when the loading of any
 individual component nest is complete until it is *actually* complete (which is
 still debateable).
-
-When two components have a parent-child relationship, the parent should create
-the child Element during its `onBuild()` hook, which ensures that the child's
-`onBuild()` hook can rely on the parent for data that was initialized earlier in
-the parent's rendering process.
 
 ## Hooks
 
