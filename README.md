@@ -5,41 +5,40 @@
 
 **Lowrider.js** is a ES6 JavaScript library that enhances [Web
 Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components) and
-makes them better at being the foundation of your application in a completely
-vanilla environment. Specifically, Lowrider.js implements a **[component
-lifecycle](#component-lifecycle)** that makes Web Components more flexible and
-reusable, especially when using many together to create complex UI's.
+makes them **better building blocks in a completely vanilla environment**. Specifically,
+Lowrider.js implements a **[component lifecycle](#component-lifecycle)** that
+makes Web Components more flexible and reusable, especially when using many
+together to create complex UI's.
 
 Lowrider.js also provides unopinionated functionality for application centric
 features, such as **component state**, **component caching**, HTML5
 drag-and-drop, infinite scroll, content rendering, data binding, Element
 creation, and more.
 
-## Component Lifecycle
 
 A Web Component's life begins at DOM insertion and ends at DOM removal.
 Everything that happens in between is the lifecycle. Understanding and reacting
 to lifecycle events with **[hooks](#hooks)** is crucial to creating efficent
 Lowrider.js components.
 
-**[Lifecycle events](#all-lifecycle-events)** are the steps that can happen while
-the component exists in the DOM. Lowrider.js's true power is in how it
+**[Lifecycle events](#lifecycle-events)** are the normal stages of life that
+all Elements go through while in the DOM. Lowrider.js's true power is in how it
 automatically manages these events to **maintain component state** and
-**optimize rendering**. 
+**optimize rendering**.
 
-#### All Lifecycle Events
+#### Lifecycle Events
 
-0. *An instance of the custom Element is inserted into the DOM.*
-1. `spawn` - The Web Component knows of its own existance but has not yet rendered.
-2. `build` - The Web Component should build itself (i.e., query an API, inject inner HTML).
-3. `load` - The Web Component's inner HTML has rendered, **and all child Web
-   Components have spawned**.
+0. *An instance of the web component (custom element) is inserted into the DOM.*
+1. `spawn` - The web component knows of its own existance but has not yet rendered.
+2. `build` - The web component should build itself (i.e., query an API, inject inner HTML).
+3. `load` - The web component's inner HTML has rendered, **and all child web
+   components have spawned**.
 4. `removed` - Final moments before the instance is removed from the DOM **and
    memory**.
 
 Together, steps 1, 2, and 3 make up the "rendering process".
 
-Lowrider.js provides a `render()` method, but since Web Components
+Lowrider.js provides a `render()` method, but since web components
 automatically render themselves upon DOM insertion, the method does not need to be
 invoked unless you want to *re*render. See more on the [render method](#render).
 
@@ -96,7 +95,7 @@ Lowrider.register('my-element', class MyElement extends Lowrider {
 
 ## Creating Component Instances
 
-Once a Web Component has been registered with the document, instances of it can
+Once a web component has been registered with the document, instances of it can
 be created. Typically, this is done by simply inserting it into the DOM, and doing so
 will trigger the rendering process.
 
@@ -166,7 +165,7 @@ this.props.listName = 'Playlist 1'
 
 ## Caching
 
-Since Web Components cannot exist outside of the DOM, the components themselves
+Since web components cannot exist outside of the DOM, the components themselves
 cannot be tasked with caching their own contents. Instead, that responsibility
 typically falls to the UI's router, a purpose built module, or simply the
 browser if there is no single-page application context.
