@@ -18,29 +18,29 @@ creation, and more.
 ## Lifecycle
 
 Web component instances begin existing at DOM insertion and stop existing at DOM
-removal. Everything that happens in between is the lifecycle. Understanding and
-reacting to **[Lifecycle events](#lifecycle-events)** with **[hooks](#hooks)**
+removal; everything that happens in between is the lifecycle. Understanding and
+reacting to **[lifecycle events](#lifecycle-events)** with **[hooks](#hooks)**
 is crucial to creating efficent Lowrider.js components.
 
 Lifecycle events can only happen while the component exists in the DOM.
 Lowrider.js's true power is in how it automatically manages these events to
-**maintain component state** and **optimize rendering**, and **remove the need
+**maintain component state**, **optimize rendering**, and **remove the need
 for a virtual DOM**.
 
 #### Lifecycle Events
 
 0. *An instance of the web component (custom element) is inserted into the DOM.*
-1. `spawn` - Immediately, the `spawn` event fires. The web component knows of
+1. **`spawn`** - Immediately, the `spawn` event fires. The web component knows of
    its own existance and the document in which it lives.
-2. `build` - Immediately after spawning is completed, the component enters the
+2. **`build`** - Immediately after spawning is completed, the component enters the
    `build` lifecycle event. It should now build itself (i.e., query an
    API, inject inner HTML, spawn more components). This step is **skipped** when
    using a cached component.
-3. `load` - One event loop tick after building is completed, the component enters
+3. **`load`** - One event loop tick after building is completed, the component enters
    the `load` lifecycle event. All child web components injected during the
    build will have had their `spawn` events triggered before this component's
    load. The component now waits for user interaction or DOM removal.
-4. `removed` - Final moments before the instance is removed from the DOM **and
+4. **`removed`** - Final moments before the instance is removed from the DOM **and
    memory**.
 
 Together, steps 1, 2, and 3 make up the **"rendering process"** that all
