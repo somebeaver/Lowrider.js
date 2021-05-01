@@ -10,17 +10,17 @@ Lowrider.js implements a **[component lifecycle](#component-lifecycle)** that
 makes web components more flexible and reusable, especially when using many
 together to create complex UI's.
 
-Lowrider.js also provides unopinionated functionality for application centric
-features, such as **component state**, **component caching**, HTML5
+Lowrider.js also provides unopinionated functionality for building web based
+applications, such as **component state**, **component caching**, HTML5
 drag-and-drop, infinite scroll, content rendering, data binding, Element
 creation, and more.
 
 ## Lifecycle
 
-A Web Component's life begins at DOM insertion and ends at DOM removal.
-Everything that happens in between is the lifecycle. Understanding and reacting
-to lifecycle events with **[hooks](#hooks)** is crucial to creating efficent
-Lowrider.js components.
+Web component instances begin existing at DOM insertion and stop existing at DOM
+removal. Everything that happens in between is the lifecycle. Understanding and
+reacting to lifecycle events with **[hooks](#hooks)** is crucial to creating
+efficent Lowrider.js components.
 
 **[Lifecycle events](#lifecycle-events)** are the normal stages of life that
 all Elements go through while in the DOM. Lowrider.js's true power is in how it
