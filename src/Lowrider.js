@@ -1,6 +1,8 @@
 export default class Lowrider extends HTMLElement {
   /**
    * Fires when the custom element enters the document, whether cached or not.
+   * 
+   * @ignore
    */
   async connectedCallback() {
     this.locked = this.hasAttribute('locked')
@@ -46,6 +48,8 @@ export default class Lowrider extends HTMLElement {
 
   /**
    * When the Element is removed from the document.
+   * 
+   * @ignore
    */
   disconnectedCallback() {
     if (this.locked) return
@@ -65,6 +69,7 @@ export default class Lowrider extends HTMLElement {
    * Returns a new proxied object for use in this.props. 
    * 
    * @returns {object}
+   * @ignore
    */
   _newPropsProxiedObject() {
     let newProxiedObject = {}
@@ -85,14 +90,10 @@ export default class Lowrider extends HTMLElement {
   }
 
   /**
-   * Spawns the instance "brains". The spawn event always triggers, regardless
-   * of wehether the Element needs to also render.
-   * 
-   * - Usage:
-   *   - Invoke `.spawn()` when you only want to refresh the dynamic part of the
-   *     instance and not refresh the inner HTML.
-   *   - This is usually not what you want to do... but it exists and is exposed.
-   * 
+   * Spawns event invoker. The spawn event always triggers, regardless of
+   * wehether the Element needs to also render. Your class should implement
+   * `onSpawn` to react to this.
+   *
    * @param {*} [renderOpts] - Options to give to `onSpawn()`.
    */
   async spawn(renderOpts) {
@@ -113,8 +114,9 @@ export default class Lowrider extends HTMLElement {
   }
 
   /**
-   * Renders the inner HTML of the Element instance.
-   * 
+   * Build event invoker. Does not check `shouldBuild()`. Your class should
+   * implement `onBuild` to react to this.
+   *
    * @param {*} [renderOpts] - Options to give to `onBuild()`.
    */
   async build(renderOpts) {
@@ -138,7 +140,7 @@ export default class Lowrider extends HTMLElement {
   }
 
   /**
-   * The load step.
+   * The load step. Your class should implement `onLoad` to react to this.
    */
   async load() {
     if ('onLoad' in this) {
@@ -157,7 +159,7 @@ export default class Lowrider extends HTMLElement {
    * Determines whether this instance should render or not. This is determined
    * by checking if there is any child Element. If none exists, we must render.
    * 
-   * This method can be overwritten by Elements that implement Lowrider.
+   * Your class may override this.
    */
   async shouldBuild() {
     if (this.locked) return false
@@ -207,7 +209,7 @@ export default class Lowrider extends HTMLElement {
   }
 
   /**
-   * Creates a mutation listener that watches for attribute changes
+   * Creates a mutation listener that watches for attribute changes.
    * 
    * @param {(string|array)} attr - Attribute name, or an array of attributes.
    */

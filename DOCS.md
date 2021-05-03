@@ -1,37 +1,22 @@
 ## Functions
 
 <dl>
-<dt><a href="#connectedCallback">connectedCallback()</a></dt>
-<dd><p>Fires when the custom element enters the document, whether cached or not.</p>
-</dd>
-<dt><a href="#disconnectedCallback">disconnectedCallback()</a></dt>
-<dd><p>When the Element is removed from the document.</p>
-</dd>
-<dt><a href="#_newPropsProxiedObject">_newPropsProxiedObject()</a> ⇒ <code>object</code></dt>
-<dd><p>Returns a new proxied object for use in this.props.</p>
-</dd>
 <dt><a href="#spawn">spawn([renderOpts])</a></dt>
-<dd><p>Spawns the instance &quot;brains&quot;. The spawn event always triggers, regardless
-of wehether the Element needs to also render.</p>
-<ul>
-<li>Usage:<ul>
-<li>Invoke <code>.spawn()</code> when you only want to refresh the dynamic part of the
-instance and not refresh the inner HTML.</li>
-<li>This is usually not what you want to do... but it exists and is exposed.</li>
-</ul>
-</li>
-</ul>
+<dd><p>Spawns event invoker. The spawn event always triggers, regardless of
+wehether the Element needs to also render. Your class should implement
+<code>onSpawn</code> to react to this.</p>
 </dd>
 <dt><a href="#build">build([renderOpts])</a></dt>
-<dd><p>Renders the inner HTML of the Element instance.</p>
+<dd><p>Build event invoker. Does not check <code>shouldBuild()</code>. Your class should
+implement <code>onBuild</code> to react to this.</p>
 </dd>
 <dt><a href="#load">load()</a></dt>
-<dd><p>The load step.</p>
+<dd><p>The load step. Your class should implement <code>onLoad</code> to react to this.</p>
 </dd>
 <dt><a href="#shouldBuild">shouldBuild()</a></dt>
 <dd><p>Determines whether this instance should render or not. This is determined
 by checking if there is any child Element. If none exists, we must render.</p>
-<p>This method can be overwritten by Elements that implement Lowrider.</p>
+<p>Your class may override this.</p>
 </dd>
 <dt><a href="#render">render([opts])</a></dt>
 <dd><p>Performs a render on an existing Element by calling the <code>onRemoved</code> handler
@@ -45,7 +30,7 @@ without the Element existing in the first place (as in, already rendered).</p>
 <dd><p>Unlocks a web component.</p>
 </dd>
 <dt><a href="#watchAttr">watchAttr(attr)</a></dt>
-<dd><p>Creates a mutation listener that watches for attribute changes</p>
+<dd><p>Creates a mutation listener that watches for attribute changes.</p>
 </dd>
 <dt><a href="#supportInfiniteScroll">supportInfiniteScroll(cb, viewSelector)</a> ⇒ <code>function</code></dt>
 <dd><p>Enables support for infinite scroll on an Element instance by registering
@@ -104,34 +89,12 @@ registered with the browser.</p>
 </dd>
 </dl>
 
-<a name="connectedCallback"></a>
-
-## connectedCallback()
-Fires when the custom element enters the document, whether cached or not.
-
-**Kind**: global function  
-<a name="disconnectedCallback"></a>
-
-## disconnectedCallback()
-When the Element is removed from the document.
-
-**Kind**: global function  
-<a name="_newPropsProxiedObject"></a>
-
-## \_newPropsProxiedObject() ⇒ <code>object</code>
-Returns a new proxied object for use in this.props.
-
-**Kind**: global function  
 <a name="spawn"></a>
 
 ## spawn([renderOpts])
-Spawns the instance "brains". The spawn event always triggers, regardless
-of wehether the Element needs to also render.
-
-- Usage:
-  - Invoke `.spawn()` when you only want to refresh the dynamic part of the
-    instance and not refresh the inner HTML.
-  - This is usually not what you want to do... but it exists and is exposed.
+Spawns event invoker. The spawn event always triggers, regardless of
+wehether the Element needs to also render. Your class should implement
+`onSpawn` to react to this.
 
 **Kind**: global function  
 
@@ -142,7 +105,8 @@ of wehether the Element needs to also render.
 <a name="build"></a>
 
 ## build([renderOpts])
-Renders the inner HTML of the Element instance.
+Build event invoker. Does not check `shouldBuild()`. Your class should
+implement `onBuild` to react to this.
 
 **Kind**: global function  
 
@@ -153,7 +117,7 @@ Renders the inner HTML of the Element instance.
 <a name="load"></a>
 
 ## load()
-The load step.
+The load step. Your class should implement `onLoad` to react to this.
 
 **Kind**: global function  
 <a name="shouldBuild"></a>
@@ -162,7 +126,7 @@ The load step.
 Determines whether this instance should render or not. This is determined
 by checking if there is any child Element. If none exists, we must render.
 
-This method can be overwritten by Elements that implement Lowrider.
+Your class may override this.
 
 **Kind**: global function  
 <a name="render"></a>
@@ -191,7 +155,7 @@ Unlocks a web component.
 <a name="watchAttr"></a>
 
 ## watchAttr(attr)
-Creates a mutation listener that watches for attribute changes
+Creates a mutation listener that watches for attribute changes.
 
 **Kind**: global function  
 
