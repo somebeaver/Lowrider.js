@@ -260,8 +260,6 @@ export default class Lowrider extends HTMLElement {
   }
   
   /**
-   * This was implemented specifically for Hydra Media Center.
-   *
    * This function registers event listeners on the web component that help
    * determine when a user is interacting with it.
    *
@@ -323,8 +321,6 @@ export default class Lowrider extends HTMLElement {
   }
 
   /**
-   * This was implemented specifically for Hydra Media Center.
-   * 
    * When the listeners created by `supportInteractingState()` detect that the user is interacting
    * with the Element, this function will set the interacting state for the Element. This can also
    * be invoked manually.
