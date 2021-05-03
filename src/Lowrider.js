@@ -469,11 +469,12 @@ export default class Lowrider extends HTMLElement {
    * If creating a custom element, that custom element must have already been
    * registered with the browser.
    *
-   * @param {object} options - Options object:
-   * - `name` - (required) The element name (`div`, `span`, `custom-element`)
-   * - `attrs - An object of attributes and their values to be set on the
-   *   Element.
-   * - `bindings` - An object of keys and values to be bound to the Element.
+   * @param {string} options.name - Required. Element tag name.
+   * @param {object} [options.attrs] - An object of attributes and their values
+   * to be set on the Element.
+   * @param {object} [options.bindings] - An object of keys and values to be
+   * bound to the Element.
+   * @static
    */
   static elementFactory(options) {
     let fragment = document.createDocumentFragment()
@@ -508,6 +509,7 @@ export default class Lowrider extends HTMLElement {
    * 
    * @param {string} name - The Element tag, e.g., `custom-list`.
    * @param {object} implementation - The class implementation of the Element.
+   * @static
    */
   static register(name, implementation) {
     if (window.customElements.get(name) !== undefined) {

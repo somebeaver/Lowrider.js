@@ -29,7 +29,7 @@ extends the `Lowrider` class. When referring to Web Components in general, "web
 component" is always used.
 
 "Element" (capitalized) always refers to an `Element` instance (DOM node);
-"element" (lowercase) refers to the DOM and its elements.
+"element" (lowercase) refers to DOM elements in general.
 
 ## Concepts
 
@@ -61,8 +61,8 @@ a virtual DOM**.
 3. **`load`** - One event loop tick after building is completed, the component
    enters the `load` lifecycle event. It can now manipulate its child
    HTML, and should listen for user interaction, or wait for DOM removal.
-4. **`removed`** - Final moments before the component is removed from the DOM **and
-   memory**.
+4. **`removed`** - Final moments before the component is removed from the DOM
+   and memory.
 
 **Together, steps 1, 2, and 3 make up the "rendering process" that all
 components immediately go through when inserted into the DOM.**
@@ -74,22 +74,21 @@ invoked unless you want to *re*render. More on the [render method](#render).
 ### Order of Events
 
 Lowrider.js takes a top-down approach to UI rendering. It is import to
-understand how events trigger, when the trigger, and what the events are
+understand how events trigger, when they trigger, and what the events are
 designed to do.
 
-As a simple example, when `<music-app>` (*fig 1*) is **initially** inserted
+As a simple example, when `<music-app>` *(fig 1)* is **initially** inserted
 into the DOM, it is empty.
 
 ```html
-<!-- fig. 1: spawn -->
+<!-- fig. 1: initial creation -->
 
 <music-app></music-app>
 ```
 
 By default, Lowrider.js handles caching by checking if `<music-app>` has any
-inner HTML. In this case it does not, so Lowrider.js thinks that the Element
-does not have any cache, and all three rendering process steps are triggered
-(`spawn`, `build`, and `load`).
+inner HTML. In this case it does not,  all three rendering process steps are
+triggered (`spawn`, `build`, and `load`).
 
 If the component is designed correctly, the `onSpawn()` hook should perform
 instance initialization, the `onBuild()` hook should construct the inner HTML,
@@ -97,7 +96,7 @@ and the `onLoad()` hook should manipulate the inner HTML. It is ultimately up to
 the developer to decide what these things mean for each component, and the
 developer has lots of freedom in how these events work.
 
-After the rendering process, the component may look something like *fig. 2*.
+After the rendering process, the component may now have inner HTML *(fig. 2)*.
 
 ```html
 <!-- fig. 2: after rendering process -->
@@ -117,16 +116,20 @@ With the top-down approach, the root component begins a chain of component
 injection and rendering that continues until the initial state of the app is
 ready. This is called rendering **in series**.
 
-However, when inserting big chunks of nested HTML (*fig 2*), all components are
+However, when inserting big chunks of nested HTML *(fig 3)*, all components are
 spawned, built, and loaded **in parallel**. This is the default nature of the
 DOM.
 
-Follow the numbers to follow the order of events when loading in parallel.
-Events surrounded by `~` sqigglies denote a skipped event because Lowrider.js
-will think that the component is using cache.
+Follow the numbers to follow the order of events. Events surrounded by `~`
+sqigglies denote a skipped event because Lowrider.js will think that the
+component is using cache.
+
+It is important to understand that with parallel loading, `(2-spawn)` does not
+wait for `(1-spawn)` to finish. While `(2-spawn)` does technically happen after,
+it is happening on the same event loop tick.
 
 ```html
-<!-- fig. 2 -->
+<!-- fig. 3: rendering in parallel -->
 
 <zoo-animals>                     (1-spawn), ~(7-build)~, (13-load)
     <zoo-enclosure>               (2-spawn), ~(8-build)~, (14-load)
@@ -308,6 +311,8 @@ to initialize itself using that state, or from scratch. It is up to the
 developer to ensure that they don't create any important Element object
 properties that get lost when the instance is removed; instead, make sure those
 things are saved as attributes.
+
+Note that Lowrider.js is not designed for use with the shadow DOM.
 
 ### Using the `props` Property
 
