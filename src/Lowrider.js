@@ -1,5 +1,5 @@
 /**
- * @module Lowrider.js
+ * @module Lowrider
  */
 export default class Lowrider extends HTMLElement {
   /**
