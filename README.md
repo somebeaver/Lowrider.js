@@ -341,9 +341,9 @@ async onSpawn() {
 
 ### Drop Area
 
-Enable "drop receiver" functionality any Lowrider.js component. This will allow
-the compoent to receive drops from outside of the web browser (e.g., the user
-drags a file or folder from macOS Finder or Windows Explorer onto this
+Enable "drop receiver" functionality for any Lowrider.js component. This will
+allow the compoent to receive drops from outside of the web browser (e.g., the
+user drags a file or folder from macOS Finder or Windows Explorer onto this
 component).
 
 This is not HTML5 drag-and-drop.

@@ -4,9 +4,11 @@
   "author": "somebeaver",
   "private": true,
   "scripts": {
-    "test": "./test/test-env.js"
+    "test": "./test/test-env.js",
+    "docs": "jsdoc2md ./src/Lowrider.js > DOCS.md"
   },
   "devDependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "jsdoc-to-markdown": "^6.0.0"
   }
 }
