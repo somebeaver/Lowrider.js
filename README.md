@@ -9,12 +9,13 @@ implementing a **[lifecycle](#lifecycle)** that **makes it easy to manage their
 state** in single-page applications.
 
 Lowrider.js also provides unopinionated functionality for building applications:
- - Caching
+ - State for Web Components
  - HTML drag and drop
  - File drag and drop (drop zone)
  - Attribute watching
  - Infinite scroll
  - User interaction detection
+ - Singletons
  - And more
 
 ## API Reference
@@ -71,7 +72,7 @@ components immediately go through when inserted into the DOM.**
 automatically render themselves upon DOM insertion, the method does not need to be
 invoked unless you want to *re*render. More on the [render method](#render).
 
-### Order of Events
+### Order of Events / Rendering in Series vs. Parallel
 
 Lowrider.js takes a top-down approach to UI rendering. It is import to
 understand how events trigger, when they trigger, and what the events are
@@ -83,20 +84,32 @@ into the DOM, it is empty.
 ```html
 <!-- fig. 1: initial creation -->
 
-<music-app></music-app>
+<!doctype html>
+<html>
+  <head></head>
+  <body>
+
+    <music-app></music-app>
+
+  </body>
+</html>
 ```
 
-By default, Lowrider.js handles caching by checking if `<music-app>` has any
-inner HTML. In this case it does not,  all three rendering process steps are
-triggered (`spawn`, `build`, and `load`).
+By default, Lowrider.js handles component state caching by checking if the
+component (`<music-app>`) has any inner HTML. In this case it does not, so all
+three rendering process steps are triggered (`spawn`, `build`, and `load`)
+because there was no cache.
 
-If the component is designed correctly, the `onSpawn()` hook should perform
+**If the component is designed correctly, the `onSpawn()` hook should perform
 instance initialization, the `onBuild()` hook should construct the inner HTML,
-and the `onLoad()` hook should manipulate the inner HTML. It is ultimately up to
-the developer to decide what these things mean for each component, and the
-developer has lots of freedom in how these events work.
+and the `onLoad()` hook should manipulate the inner HTML.** However, it is
+ultimately up to the developer to decide what these things mean for each
+component, and the developer has a lot of freedom in how the component comes to
+life.
 
 After the rendering process, the component may now have inner HTML *(fig. 2)*.
+Or it may not, it's up to you and what your component is designed to do. In this
+case, it inserts inner HTML.
 
 ```html
 <!-- fig. 2: after rendering process -->
@@ -114,63 +127,71 @@ After the rendering process, the component may now have inner HTML *(fig. 2)*.
 
 With the top-down approach, the root component begins a chain of component
 injection and rendering that continues until the initial state of the app is
-ready. This is called rendering **in series**.
+ready.
 
-However, when inserting big chunks of nested HTML *(fig 3)*, all components are
-spawned, built, and loaded **in parallel**. This is the default nature of the
-DOM.
+#### Rendering in Series
 
-Follow the numbers to follow the order of events. Events surrounded by `~`
-sqigglies denote a skipped event because Lowrider.js will think that the
-component is using cache.
+Breaking it down step by step, as soon as the `<music-app>` component is
+injected into the DOM, it spawns, then builds, then loads. It is only **during**
+the `build` event of `<music-app>` that `<music-queue>` begins its render
+process. From `<music-queue>`'s perspective, it has access to the HTML that
+`<music-app>` injected, but any other child components of `<music-app>` will not
+have rendered yet.
 
-It is important to understand that with parallel loading, `(2-spawn)` does not
+So, if you wanted `<music-queue>` to be able to look upwards in the DOM and have
+access to something specific from `<music-app>`, it is necessary to bind that
+property during the `<music-app>` spawn process. Or, preferrably use the
+[element factory](#programmatic-creation) to create the Element with data
+pre-bound to it.
+
+This design pattern is called rendering **in series**. Components may have
+relationships and expectations of data availability.
+
+However, it is not the nature of Web Components to wait for each other
+to render. This behavior is implemented by Lowrider.js, and care must be taken
+to use the hooks correctly.
+
+#### Rendering in Parallel
+
+The default behavior of Web Components is to render themselves with no concern
+for other components in the DOM. This behaviour is encounted when inserting big
+chunks of nested HTML *(fig 3)*; all components are spawned, built, and loaded
+**in parallel**.
+
+Follow the numbers to follow the order of events. Events surrounded by
+tildes (`~`) denote a skipped event because Lowrider.js will think that the
+component is using a cached state (beacuse of the existance of inner HTML).
+
+It is important to understand that with parallel rendering, `(2-spawn)` does not
 wait for `(1-spawn)` to finish. While `(2-spawn)` does technically happen after,
 it is happening on the same event loop tick.
 
 ```html
-<!-- fig. 3: rendering in parallel -->
+<!-- fig. 3: a string of HTML inserted into the DOM -->
 
-<zoo-animals>                     (1-spawn), ~(7-build)~, (13-load)
-    <zoo-enclosure>               (2-spawn), ~(8-build)~, (14-load)
-        <zoo-pond>                (3-spawn), ~(9-build)~, (15-load)
-          <zoo-fish></zoo-fish>   (4-spawn),  (10-build), (16-load)
+<zoo-animals>                                 (1-spawn), ~(7-build)~, (13-load)
+    <zoo-enclosure>                           (2-spawn), ~(8-build)~, (14-load)
+        <zoo-pond>                            (3-spawn), ~(9-build)~, (15-load)
+          <zoo-fish name="Nemo"></zoo-fish>   (4-spawn),  (10-build), (16-load)
         </zoo-pond>
     </zoo-enclosure>
 
-    <zoo-goat></zoo-goat>         (5-spawn), (11-build), (17-load)
-    <zoo-owl></zoo-owl>           (6-spawn), (12-build), (18-load)
+    <zoo-goat></zoo-goat>                     (5-spawn), (11-build), (17-load)
+    <zoo-owl></zoo-owl>                       (6-spawn), (12-build), (18-load)
 </zoo-animals>
 ```
 
-The main takeaways here are that:
-
-1. Take into consideration whether your component will render in parallel or
-   not.
-1. Components should be designed to load in parallel when possible.
-1. When a component needs to look upwards for contextual data in the DOM, it is
-   probably better to render it in series.
-
-#### Async Operations in the Build Step
-
-Components often need to fetch data from an API or local storage, which can add
-significant loading time to an `onBuild()` hook.
-
-Lowrider.js is optimized for slow async operations in `onBuild()`, and will skip
-the build event alltogether when a component is considered to be loading from
-cache. The efficacy of this optimization of course depends on the developer
-segmenting their code into the hooks properly.
-
-Since any component can, during its `onBuild()` hook, add arbitrary HTML to the
-document, it's impossible to look downwards and know when the loading of any
-individual component nest is complete until it is *actually* complete (which is
-up for debate).
+So, `<zoo-animals>`, `<zoo-enclosure>`, and `<zoo-pond>` were considered cached
+because they were inserted into the DOM with inner HTML. Had their `build`
+events been triggered, new inner HTML would've been inserted, and we would've
+lost `<zoo-fish>`'s name property (assuming that `<zoo-pond>` inserts HTML on
+build).
 
 ### Hooks
 
 Hooks are called by Lowrider.js when certain lifecycle events happen. Hooks
 should always be async functions, or must otherwise return a `Promise`. Return
-false in a hook to stop rendering of the component.
+false in a hook to stop rendering the component.
 
 For each lifecycle event, there is a hook.
 
@@ -201,6 +222,20 @@ For each lifecycle event, there is a hook.
     **not** trigger when the user closes the browser.
   - Example tasks: removing event listeners.
 
+### Async Operations in the Build Step
+
+Components often need to fetch data from an API or local storage, which can add
+significant loading time to an `onBuild()` hook.
+
+Lowrider.js is optimized for slow async operations in `onBuild()`, and will skip
+the build event alltogether when a component is considered to be loading from
+cache. The efficacy of this optimization of course depends on the developer
+segmenting their code into the hooks properly.
+
+Since any component can, during its `onBuild()` hook, add arbitrary HTML to the
+document, it's impossible to look downwards and know when the loading of any
+individual component nest is complete until it is *actually* complete.
+
 ### Registering Components
 
 Registering a Lowrider.js component is no different than with vanilla Web
@@ -210,7 +245,7 @@ so. Your class must always extend Lowrider.
 ```javascript
 import Lowrider from 'Lowrider.js'
 
-// the humble beginnings of all Lowrider.js components
+// everything that a Lowrider.js component needs
 Lowrider.register('my-element', class MyElement extends Lowrider {
   async onSpawn() {}
   async onBuild() {}
@@ -220,7 +255,7 @@ Lowrider.register('my-element', class MyElement extends Lowrider {
 ```
 
 Components only need to be registered once, then can be used in the DOM. Trying
-to register a component that was already registered will result in an error.
+to register a component that was already registered will throw in an error.
 
 Lowrider.js components can also be registered with vanilla JS, as long as the class
 extends `Lowrider`.
@@ -236,7 +271,7 @@ with attributes, and/or with inner HTML. When an Element is inserted with inner
 HTML, Lowrider.js assumes it is being loaded with cached content, and the
 **build** event will **not** trigger.
 
-Statically typed Elements can cover 99% of use cases, but are limited by the
+Statically typed Elements can cover most use cases, but are limited by the
 fact that HTML attributes can only hold a maximum amount of stringified data.
 
 #### Statically Typed Creation
@@ -296,7 +331,7 @@ never left at all. Of course, while they're gone, their code won't execute.
 
 Lowrider.js was designed for use with
 [router.js](https://github.com/somebeaver/router.js), an open source
-unopinionated UI router for single-page applications written by the same author,
+unopinionated UI router for single-page applications written by the same developer,
 and optimized for use with Lowrider.js.
 
 #### But Really, Where Does the State Go?
@@ -312,14 +347,14 @@ developer to ensure that they don't create any important Element object
 properties that get lost when the instance is removed; instead, make sure those
 things are saved as attributes.
 
-Note that Lowrider.js is not designed for use with the shadow DOM.
+Note that Lowrider.js is not tested for use with the shadow DOM.
 
 ### Using the `props` Property
 
 Lowrider.js components come with a property called `props`. This property is an
 object that can be used for for one-way textual data binding with inner HTML.
 
-Lowrider.js will ensure that props are be applied properly when using the factory.
+Lowrider.js will ensure that props are applied properly when using the factory.
 
 **Do not overwrite the `props` property itself, it is a special proxied
 object.**
@@ -352,12 +387,14 @@ trigger the `spawn`, `build` (maybe), and `load` events (which triggers their ho
 
 #### Build Determiner (`shouldBuild()`)
 
-Sometimes, a component may need to implement custom logic to determine if it
-needs to rebuild itself or not. Lowrider.js components can implement
-`shouldRender()` to override the default behavior.
+A component may need to implement custom logic to determine if it needs to
+rebuild itself or not, or simply disable caching altogether. Lowrider.js
+components can implement `shouldRender()` to override the default behavior.
 
 Simply return true to proceed with triggering the `build` event (and therefore
-the `onBuild()` hook), or return false to skip the event and hook.
+the `onBuild()` hook), or return false to skip them.
+
+Note that the `spawn` and `load` events cannot be skipped.
 
 ```javascript
 class StatusIndicator extends Lowrider {
@@ -381,8 +418,8 @@ async onSpawn() {
 }
 ```
 
-*Caution!* Calling `render()` in a watched attribute will result in an infinite
-loop.
+*Caution!* Updating a watched attribute value in a watched attribute callback
+will result in an infinite loop.
 
 #### Infinite Scroll
 
@@ -398,7 +435,7 @@ async onSpawn() {
 
 "Interacting" state was designed specifically for the [Cardinal
 apps](https://cardinalapps.xyz), and it lets the component know when the user is
-interacting with it (i.e., clicked inside it; tabbed into it; right clicked it).
+interacting with it (e.g., clicked inside it; tabbed into it; right clicked it).
 
 Lowrider.js will automatically add the class "interacting" when the user is
 interacting with the instance.
@@ -408,7 +445,7 @@ async onSpawn() {
   // registers event listeners
   this.supportInteractingState()
 
-  // programmatically enter "interacting" state
+  // optionally programmatically enter "interacting" state
   this.enterInteractingState()
 }
 ```
