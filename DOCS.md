@@ -8,6 +8,9 @@
         * [.build([renderOpts])](#module_Lowrider+build)
         * [.load()](#module_Lowrider+load)
         * [.shouldBuild()](#module_Lowrider+shouldBuild)
+        * [.isUsingLazyRenderMode()](#module_Lowrider+isUsingLazyRenderMode)
+        * [.enableLazyRender()](#module_Lowrider+enableLazyRender)
+        * [.disableLazyRender()](#module_Lowrider+disableLazyRender)
         * [.render([opts])](#module_Lowrider+render)
         * [.unlock()](#module_Lowrider+unlock)
         * [.watchAttr(attr)](#module_Lowrider+watchAttr)
@@ -57,6 +60,29 @@ Determines whether this instance should render or not. This is determined
 by checking if there is any child Element. If none exists, we must render.
 
 Your class may override this.
+
+**Kind**: instance method of [<code>Lowrider</code>](#module_Lowrider)  
+<a name="module_Lowrider+isUsingLazyRenderMode"></a>
+
+### lowrider.isUsingLazyRenderMode()
+Checks if this instance currently has lazy-render mode enabled.
+
+**Kind**: instance method of [<code>Lowrider</code>](#module_Lowrider)  
+<a name="module_Lowrider+enableLazyRender"></a>
+
+### lowrider.enableLazyRender()
+Enables lazy-render mode by creating an IntersectionObserver and observing
+this Element. If you use the `lazy-render` attribute, or the `lazyRender =
+true` property, you do not need to call this.
+
+**Kind**: instance method of [<code>Lowrider</code>](#module_Lowrider)  
+<a name="module_Lowrider+disableLazyRender"></a>
+
+### lowrider.disableLazyRender()
+Disables lazy-render mode by deleting the observers and ensuring that the
+attribute is gone. This is normally handled automatically, so you don't
+need to call this unless your intention is to disable the lazy render
+callback before it has triggered.
 
 **Kind**: instance method of [<code>Lowrider</code>](#module_Lowrider)  
 <a name="module_Lowrider+render"></a>

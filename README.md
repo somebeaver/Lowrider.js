@@ -9,7 +9,8 @@ implementing a **[lifecycle](#lifecycle)** that **makes it easy to manage their
 state** in single-page applications.
 
 Lowrider.js also provides unopinionated functionality for building applications:
- - State for Web Components
+ - [Web Component state](#but-really-where-does-the-state-Go)
+ - [Lazy rendering](#lazy-rendering)
  - HTML drag and drop
  - File drag and drop (drop zone)
  - Attribute watching
@@ -141,8 +142,8 @@ have rendered yet.
 So, if you wanted `<music-queue>` to be able to look upwards in the DOM and have
 access to something specific from `<music-app>`, it is necessary to bind that
 property during the `<music-app>` spawn process. Or, preferrably use the
-[element factory](#programmatic-creation) to create the Element with data
-pre-bound to it.
+[element factory](#programmatic-creation) to create the `<music-queue>` with
+data pre-bound to it.
 
 This design pattern is called rendering **in series**. Components may have
 relationships and expectations of data availability.
@@ -368,9 +369,9 @@ Example:
 this.props.listName = 'Playlist 1'
 ```
 
-### Other Features
+## Other Features
 
-#### Render
+### Render
 
 Lowrider.js provides a `render()` function that allows components to be rerendered.
 Calling this is always technically a *re*render, and it will not remove the
@@ -384,7 +385,7 @@ myElement.render()
 Under the hood, `render()` will call this instance's `onRemoved` hook, then
 trigger the `spawn`, `build` (maybe), and `load` events (which triggers their hooks).
 
-#### Build Determiner (`shouldBuild()`)
+### Build Determiner (`shouldBuild()`)
 
 A component may need to implement custom logic to determine if it needs to
 rebuild itself or not, or simply disable caching altogether. Lowrider.js
@@ -407,7 +408,66 @@ class StatusIndicator extends Lowrider {
 }
 ```
 
-#### Attribute Watching
+### Lazy Rendering
+
+Lowrider.js can delay the rendering of a component until it's visible to the
+user. To be considered visible, it must be in the viewport and it must not be
+hidden (e.g., with CSS or covered by another Element). The observation is done
+using the [Intersection Observer
+API](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)
+instead of expensive scroll listeners and `Element.getBoundingClientRect()`.
+
+When a component is in lazy rendering mode, the `spawn` event will still trigger
+like normal when the Element is inserted into the DOM. However, the rest of the
+rendering (`build` and `load`) will be delayed until the Element enters the
+viewport and is visible.
+
+After the initial lazy render, the Element will automatically stop observing
+itself and remove the `lazy-render` attribute (if there is one).
+
+The easiesy way to enable lazy-rendering is to use the attribute. To disable it,
+just remove the attribute.
+
+```html
+<my-component lazy-render></my-component>
+```
+
+Lazy rendering can also be enabled programmatically. This **must** be done in
+your components `onSpawn()` hook.
+
+```javascript
+async onSpawn() {
+  this.enableLazyRender()
+}
+```
+
+It is not necessary to disable lazy rendering manually. It is done automatically
+when the Element is removed from the DOM, when the lazy render is triggered, or
+when the attribute is removed.
+
+Nevertheless, it can still be done manually.
+
+```javascript
+async onSpawn() {
+  this.disableLazyRender()
+}
+```
+
+Pro tips:
+
+- Traditionally, "lazy loading" just refers to loading images when they are in
+  view. Lowrider.js takes it a step further and delays the rendering of
+  all component inner HTML, not just images.
+- Because the entire component is delayed, it will be a 0px/0px sized DOM
+  Element until it is render time. If you inject 1000 lazy-render Elements, they
+  will still all render in parallel at the same time because they're all stacked
+  on the same pixel in the viewport. For the best user experience, try to
+  paginate data into small groups, init Elements in a loading state that has
+  some width/height, or make sure that prior Elements have rendered and pushed
+  the page down enough that the user must scroll, causing Elements to come in
+  one-by-one.
+
+### Attribute Watching
 
 ```javascript
 async onSpawn() {
@@ -420,7 +480,7 @@ async onSpawn() {
 *Caution!* Updating a watched attribute value in a watched attribute callback
 will result in an infinite loop.
 
-#### Infinite Scroll
+### Infinite Scroll
 
 ```javascript
 async onSpawn() {
@@ -430,7 +490,7 @@ async onSpawn() {
 }
 ```
 
-#### "Interacting" State
+### "Interacting" State
 
 "Interacting" state was designed specifically for the [Cardinal
 apps](https://cardinalapps.xyz), and it lets the component know when the user is
@@ -438,6 +498,11 @@ interacting with it (e.g., clicked inside it; tabbed into it; right clicked it).
 
 Lowrider.js will automatically add the class "interacting" when the user is
 interacting with the instance.
+
+This method goes further than the native `focus` events. With `focus`, only one
+DOM node may be focused at a time. With the Lowrider.js interacting state, an
+Element is considered "interacted with" as long as any child Element is focused,
+including context menu items.
 
 ```javascript
 async onSpawn() {
@@ -449,7 +514,7 @@ async onSpawn() {
 }
 ```
 
-#### Drop Area
+### Drop Area
 
 Enable "drop zone" functionality for any Lowrider.js component. This will
 allow the compoent to receive drops from outside of the web browser (e.g., the

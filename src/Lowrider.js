@@ -1,7 +1,7 @@
 /**
  * @module Lowrider
  */
-export default class Lowrider extends HTMLElement {
+ export default class Lowrider extends HTMLElement {
   /**
    * Fires when the custom element enters the document, whether cached or not.
    * 
@@ -36,17 +36,25 @@ export default class Lowrider extends HTMLElement {
     // trigger spawn, which triggers the implemented onSpwan()
     await this.spawn()
 
+    // if lazy-render mode was set with an attr or a property, attach observers
+    // and stop rendering now
+    if (this.isUsingLazyRenderMode()) {
+      this.enableLazyRender()
+      return
+    }
+
+    // when NOT using lazy-render, proceed with normal rendering
+
     // only trigger build if we have to
     if (await this.shouldBuild()) {
       await this.build()
     }
 
-    // wait one tick for any injected child web components to render
+    // wait one tick so that inner HTML has been inserted into the DOM
     setTimeout(async () => {
       await this.load()
+      this.rendered = true
     }, 0)
-
-    this.rendered = true
   }
 
   /**
@@ -171,6 +179,80 @@ export default class Lowrider extends HTMLElement {
   }
 
   /**
+   * Checks if this instance currently has lazy-render mode enabled.
+   */
+  isUsingLazyRenderMode() {
+    return this.hasAttribute('lazy-render')
+  }
+
+  /**
+   * Enables lazy-render mode by creating an IntersectionObserver and observing
+   * this Element. If you use the `lazy-render` attribute, or the `lazyRender =
+   * true` property, you do not need to call this.
+   **/
+  enableLazyRender() {
+    if ('_intersectionObserver' in this && this._intersectionObserver instanceof IntersectionObserver) {
+      throw new Error('Already observing visibility')
+    }
+
+    // create an observer that watches for the removal of the lazy-render attr
+    this._lazyRenderAttrWatcher = this.watchAttr('lazy-render', (changes) => {
+      if (!this.hasAttribute('lazy-render')) {
+        this.disableLazyRender()
+      }
+    })
+
+    // create an observer that watches for when this element becomes visible.
+    // note that since Lowrider components will not have rendered any HTML at
+    // this point, the isVisible entry property will always be false (because
+    // DOM node is 0x0 px). However, we can still know if it's time to render by
+    // using the isIntersecting property, which lets us know if the element is
+    // now intersecting the viewport and not hidden.
+    this._intersectionObserver = new IntersectionObserver(async (entries, observer) => {
+      if (!entries[0].isIntersecting) {
+        return
+      }
+      
+      //console.log('component is intersecting viewport', entries)
+      
+      if (await this.shouldBuild()) {
+        //console.log('building component after intersection')
+        await this.build()
+      }
+
+      setTimeout(async () => {
+        this.disableLazyRender()
+
+        await this.load()
+        this.rendered = true
+      }, 0)
+    })
+    this._intersectionObserver.observe(this)
+  }
+
+  /**
+   * Disables lazy-render mode by deleting the observers and ensuring that the
+   * attribute is gone. This is normally handled automatically, so you don't
+   * need to call this unless your intention is to disable the lazy render
+   * callback before it has triggered.
+   */
+   disableLazyRender() {
+    if (!('_intersectionObserver' in this) || !(this._intersectionObserver instanceof IntersectionObserver)) {
+      throw new Error('Must be observing visibility')
+    }
+
+    this._lazyRenderAttrWatcher.disconnect()
+    this._lazyRenderAttrWatcher = null
+
+    this._intersectionObserver.disconnect()
+    this._intersectionObserver = null
+
+    if (this.hasAttribute('lazy-render')) {
+      this.removeAttribute('lazy-render')
+    }
+  }
+
+  /**
    * Performs a render on an existing Element by calling the `onRemoved` handler
    * first, then `spawn()`, `build()`, and `load()` handlers. This will not
    * actually reinject the Element instance, which means that existing event
@@ -192,12 +274,13 @@ export default class Lowrider extends HTMLElement {
     }
 
     await this.spawn(opts)
+
+    // note that we don't call shouldBuild() here, this will always overwrite
+    // the inner HTML
     await this.build(opts)
 
     setTimeout(() => {
-      if ('onLoad' in this) {
-        this.load(opts)
-      }
+      this.load(opts)
     }, 0)
 
     this.rendered = true
