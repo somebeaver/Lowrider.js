@@ -167,7 +167,7 @@ wait for `(1-spawn)` to **finish**. While `(2-spawn)` does technically **start**
 after, it is happening on the same event loop tick.
 
 ```html
-<!-- fig. 3: a string of HTML inserted into the DOM -->
+<!-- fig. 3: a chunk of HTML inserted into the DOM all at once -->
 
 <zoo-animals>                                 (1-spawn), ~(7-build)~, (13-load)
     <zoo-enclosure>                           (2-spawn), ~(8-build)~, (14-load)
@@ -184,14 +184,13 @@ after, it is happening on the same event loop tick.
 So, `<zoo-animals>`, `<zoo-enclosure>`, and `<zoo-pond>` were considered cached
 because they were inserted into the DOM with inner HTML. Had their `build`
 events been triggered, new inner HTML would've been inserted, and we would've
-lost `<zoo-fish>`'s name property (assuming that `<zoo-pond>` inserts HTML on
-build).
+lost `<zoo-fish>`'s name property.
 
 ### Hooks
 
 Hooks are called by Lowrider.js when certain lifecycle events happen. Hooks
-should always be async functions, or must otherwise return a `Promise`. Return
-false in a hook to stop rendering the component.
+should always be `async` functions, or if not, must return a `Promise`. Have the
+hook return false to stop rendering the component.
 
 For each lifecycle event, there is a hook.
 
@@ -222,15 +221,15 @@ For each lifecycle event, there is a hook.
     **not** trigger when the user closes the browser.
   - Example tasks: removing event listeners.
 
-### Async Operations in the Build Step
+### Slow Operations in the Build Step
 
 Components often need to fetch data from an API or local storage, which can add
 significant loading time to an `onBuild()` hook.
 
-Lowrider.js is optimized for slow async operations in `onBuild()`, and will skip
-the build event alltogether when a component is considered to be loading from
-cache. The efficacy of this optimization of course depends on the developer
-segmenting their code into the hooks properly.
+Lowrider.js is optimized for slow operations in `onBuild()`, and will skip the
+build event alltogether when a component is considered to be loading from cache.
+The efficacy of this optimization relies on the developer segmenting their code
+into the hooks properly.
 
 Since any component can, during its `onBuild()` hook, add arbitrary HTML to the
 document, it's impossible to look downwards and know when the loading of any
@@ -295,8 +294,8 @@ document.body.innerHTML = `<my-element>
 
 Creating new component instances programatically using
 `Lowrider.elementFactory()` allows us to spawn them with dynamic data like
-callback functions and variables that will be available to the component
-throughout the rendering process.
+callback functions and variables that will be available to the component from
+the get-go.
 
 ```javascript
 import Lowrider from 'Lowrider.js'
