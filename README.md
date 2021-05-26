@@ -459,17 +459,17 @@ async onSpawn() {
 
 Pro tips:
 
-- Traditionally, "lazy loading" just refers to loading images when they are in
+- Traditionally, "lazy loading" refers to loading images when they are in
   view. Lowrider.js takes it a step further and delays the rendering of
   all component inner HTML, not just images.
 - Because the entire component is delayed, it will be a 0px/0px sized DOM
   Element until it is render time. If you inject 1000 lazy-render Elements, they
   will still all render in parallel at the same time because they're all stacked
   on the same pixel in the viewport. For the best user experience, try to
-  paginate data into small groups, init Elements in a loading state that has
-  some width/height, or make sure that prior Elements have rendered and pushed
-  the page down enough that the user must scroll, causing Elements to come in
-  one-by-one.
+  paginate data into small groups, have Elements initialize in a loading state
+  that has some width/height, or make sure that prior Elements have rendered and
+  pushed the page down enough that the user must scroll, causing Elements to
+  come in one-by-one.
 
 ### Attribute Watching
 
