@@ -1,7 +1,7 @@
 /**
  * @module Lowrider
  */
- export default class Lowrider extends HTMLElement {
+export default class Lowrider extends HTMLElement {
   /**
    * Fires when the custom element enters the document, whether cached or not.
    * 
