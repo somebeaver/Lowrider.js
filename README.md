@@ -163,8 +163,8 @@ tildes (`~`) denote a skipped event because Lowrider.js will think that the
 component is using a cached state (beacuse of the existance of inner HTML).
 
 It is important to understand that with parallel rendering, `(2-spawn)` does not
-wait for `(1-spawn)` to finish. While `(2-spawn)` does technically happen after,
-it is happening on the same event loop tick.
+wait for `(1-spawn)` to **finish**. While `(2-spawn)` does technically **start**
+after, it is happening on the same event loop tick.
 
 ```html
 <!-- fig. 3: a string of HTML inserted into the DOM -->
