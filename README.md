@@ -422,10 +422,14 @@ like normal when the Element is inserted into the DOM. However, the rest of the
 rendering (`build` and `load`) will be delayed until the Element enters the
 viewport and is visible.
 
-After the initial lazy render, the Element will automatically stop observing
+Lazy rendering is designed so that you don't need to move any code anywhere
+(for example, into a `isVisible` callback). It can be enabled and disabled on
+the fly.
+
+After the lazy render has completed, the Element will automatically stop observing
 itself and remove the `lazy-render` attribute (if there is one).
 
-The easiesy way to enable lazy-rendering is to use the attribute. To disable it,
+The easiesy way to enable lazy rendering is to use the attribute. To disable it,
 just remove the attribute.
 
 ```html
