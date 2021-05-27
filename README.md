@@ -127,6 +127,12 @@ Lowrider.register('my-element', class MyElement extends Lowrider {
 })
 ```
 
+Components only need to be registered once, then can be used in the DOM. Trying
+to register a component that was already registered will throw in an error.
+
+Lowrider.js components can also be registered with vanilla JS, as long as the class
+extends `Lowrider`.
+
 ### Creating Component Instances
 
 Once a web component has been registered with the document, instances of it can
@@ -179,6 +185,10 @@ let childEl = Lowrider.elementFactory('child-element', {
 someElement.appendChild(childEl)
 childEl.speak()
 ```
+
+The factory is designed to be used to create Lowrider.js components, but
+can also be used to create standard HTML Elements (`div`, `span`, etc) with
+custom properties.
 
 ### Order of Events / Rendering in Series vs. Parallel
 
@@ -307,18 +317,6 @@ into the hooks properly.
 Since any component can, during its `onBuild()` hook, add arbitrary HTML to the
 document, it's impossible to look downwards and know when the loading of any
 individual component nest is complete until it is *actually* complete.
-
-
-
-Components only need to be registered once, then can be used in the DOM. Trying
-to register a component that was already registered will throw in an error.
-
-Lowrider.js components can also be registered with vanilla JS, as long as the class
-extends `Lowrider`.
-
-The factory is designed to be used to create Lowrider.js components, but
-can also be used to create standard HTML Elements (`div`, `span`, etc) with
-custom properties.
 
 ### Caching
 
