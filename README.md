@@ -26,18 +26,19 @@ A reference of all public Lowrider.js methods is available in
 
 ## Terminology
 
-"Component", when referring to a DOM Element, always means a DOM Element that
-extends the `Lowrider` class. When referring to Web Components in general, "web
-component" is always used.
+Throughout this documentation and source code, these words are defined as:
 
-"Element" (capitalized) always refers to an `Element` instance (DOM node);
-"element" (lowercase) refers to DOM elements in general.
+- `component` - When referring to a DOM Element, it **always** means one that
+    extends the `Lowrider` class. Otherwise, it refers to the concept of
+    application components in general.
+- `Element` - When capitalized, it **always** refers to a DOM Element instance.
+- `element` - When lowercase, it refers to DOM elements in general.
 
 ## Concepts
 
 Lowrider.js's features revolve around one main concept: the component lifecycle.
 Certain things can only happen at certain stages of a component's lifecycle; so
-understanding the lifecycle is key to writing efficent Lowrider.js components.
+understanding the lifecycle is key to writing efficient Lowrider.js components.
 
 ### Lifecycle
 
