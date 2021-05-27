@@ -9,14 +9,14 @@ implementing a **[lifecycle](#lifecycle)** that **makes it easy to manage their
 state** in single-page applications.
 
 Lowrider.js also provides unopinionated functionality for building applications:
- - [Web Component state](#but-really-where-does-the-state-Go)
+ - [Web Component state](#caching)
  - [Lazy rendering](#lazy-rendering)
- - HTML drag and drop
- - File drag and drop (drop zone)
- - Attribute watching
- - Infinite scroll
- - User interaction detection
+ - [File drag and drop (drop zone)](#drop-area)
+ - [Attribute watching](#attribute-watching)
+ - [Infinite scroll](#infinite-scroll)
+ - [User interaction detection](#interacting-state)
  - Singletons
+ - HTML drag and drop
  - And more
 
 ## API Reference
@@ -499,19 +499,24 @@ async onSpawn() {
 }
 ```
 
-### "Interacting" State
+### Interacting State
 
-"Interacting" state was designed specifically for the [Cardinal
-apps](https://cardinalapps.xyz), and it lets the component know when the user is
-interacting with it (e.g., clicked inside it; tabbed into it; right clicked it).
+User interaction detection lets the component know when the user is interacting
+with it in ways that go beyond the native `focus` listener.
 
-Lowrider.js will automatically add the class "interacting" when the user is
-interacting with the instance.
+What will enable the interacting state:
 
-This method goes further than the native `focus` events. With `focus`, only one
-DOM node may be focused at a time. With the Lowrider.js interacting state, an
-Element is considered "interacted with" as long as any child Element is focused,
-including context menu items.
+- Left click or right click directly on Element
+- Left click or right click on any child Element
+- Pressing tab and landing on any child Element
+
+The Element will stay in the interacting state while the user continues to
+interact with it, until the user stops. The class "interacting" is added to
+the Element throughout the duration of the interaction.
+
+This feature is useful for keeping a parent component in the "interacting" state
+(visually, perhaps) while the user interacts with a child context menu or
+something similar that requires changing Element focus.
 
 ```javascript
 async onSpawn() {
