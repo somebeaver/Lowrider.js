@@ -74,6 +74,112 @@ components immediately go through when inserted into the DOM.**
 automatically render themselves upon DOM insertion, the method does not need to be
 invoked unless you want to *re*render. More on the [render method](#render).
 
+### Hooks
+
+Hooks are called by Lowrider.js when certain lifecycle events happen. Hooks
+should always be `async` functions, or if not, must return a `Promise`. Have the
+hook return false to stop rendering the component.
+
+For each lifecycle event, there is a hook.
+
+1. **`onSpawn`**
+  - Use the onSpawn() hook to perform the component's initial setup.
+  - Example tasks: registering event handlers or mutation observers on itself;
+    initial component setup.
+  - **Do not** insert inner HTML, do not look downward in the DOM, do not perform
+    expensive tasks.
+  - **Do** keep this hook as lightweight as possible.
+2. **`onBuild`**
+  - Use the onBuild() hook to perform the heavy lifting of the component's
+    rendering process. This step is skipped when the component is loaded with
+    cached internals, which allows the app to maintain component state between
+    DOM insertions and removals.
+  - Example tasks: fetching remote data; big loops.
+  - **Do not** initialize new internal properties.
+  - **Do** overwrite inner HTML on each build.
+3. **`onLoad`**
+  - Use the onLoad() hook to perform after-build tasks and to interact with
+    child HTML and components. This hook should be designed to work with the
+    component in any state, as the component may have been loaded with cached
+    contents.
+  - Example tasks: manipulating inner HTML.
+4. **`onRemoved`**
+  - Use the onRemoved() hook to react to a removal event. The removal cannot be
+    stopped. The component will be removed from the DOM and from memory. Does
+    **not** trigger when the user closes the browser.
+  - Example tasks: removing event listeners.
+
+### Registering Components
+
+Registering a Lowrider.js component is no different than with vanilla Web
+Components, except that it uses the `Lowrider.register()` static method to do
+so. Your class must always extend Lowrider.
+
+```javascript
+import Lowrider from 'Lowrider.js'
+
+// everything that a Lowrider.js component needs
+Lowrider.register('my-element', class MyElement extends Lowrider {
+  async onSpawn() {}
+  async onBuild() {}
+  async onLoad() {}
+  async onRemoved() {}
+})
+```
+
+### Creating Component Instances
+
+Once a web component has been registered with the document, instances of it can
+be created. There are two ways to do so.
+
+Typically, this is done by inserting statically typed HTML into the DOM, and
+doing so will trigger the rendering process. Elements can be inserted naked,
+with attributes, and/or with inner HTML. When an Element is inserted with inner
+HTML, Lowrider.js assumes it is being loaded with cached content, and the
+**build** event will **not** trigger.
+
+Statically typed Elements can cover most use cases, but are limited by the
+fact that HTML attributes can only hold a maximum amount of stringified data.
+
+#### Statically Typed Creation
+
+```javascript
+// naked, no cache
+document.body.innerHTML = '<my-element></my-element>'
+
+// with attributes
+document.body.innerHTML = '<my-element example-attr="hello"></my-element>'
+
+// with cached contents
+document.body.innerHTML = `<my-element>
+                             <div class="foo">
+                               <div></div>
+                             </div>
+                           </my-element>`
+```
+
+#### Programmatic Creation
+
+Creating new component instances programatically using
+`Lowrider.elementFactory()` allows us to spawn them with dynamic data like
+callback functions and variables that will be available to the component from
+the get-go.
+
+```javascript
+import Lowrider from 'Lowrider.js'
+
+// create a new component instance with pre-bound data
+let childEl = Lowrider.elementFactory('child-element', {
+  'bindings': {
+    'speak': () => { console.log('I was spawned with this function reference in my properties! Wow!') }
+  }
+})
+
+// insert child, the lifecycle events will trigger for the first time
+someElement.appendChild(childEl)
+childEl.speak()
+```
+
 ### Order of Events / Rendering in Series vs. Parallel
 
 Lowrider.js takes a top-down approach to UI rendering. It is import to
@@ -188,41 +294,6 @@ because they were inserted into the DOM with inner HTML. Had their `build`
 events been triggered, new inner HTML would've been inserted, and we would've
 lost `<zoo-fish>`'s name property.
 
-### Hooks
-
-Hooks are called by Lowrider.js when certain lifecycle events happen. Hooks
-should always be `async` functions, or if not, must return a `Promise`. Have the
-hook return false to stop rendering the component.
-
-For each lifecycle event, there is a hook.
-
-1. **`onSpawn`**
-  - Use the onSpawn() hook to perform the component's initial setup.
-  - Example tasks: registering event handlers or mutation observers on itself;
-    initial component setup.
-  - **Do not** insert inner HTML, do not look downward in the DOM, do not perform
-    expensive tasks.
-  - **Do** keep this hook as lightweight as possible.
-2. **`onBuild`**
-  - Use the onBuild() hook to perform the heavy lifting of the component's
-    rendering process. This step is skipped when the component is loaded with
-    cached internals, which allows the app to maintain component state between
-    DOM insertions and removals.
-  - Example tasks: fetching remote data; big loops.
-  - **Do not** initialize new internal properties.
-  - **Do** overwrite inner HTML on each build.
-3. **`onLoad`**
-  - Use the onLoad() hook to perform after-build tasks and to interact with
-    child HTML and components. This hook should be designed to work with the
-    component in any state, as the component may have been loaded with cached
-    contents.
-  - Example tasks: manipulating inner HTML.
-4. **`onRemoved`**
-  - Use the onRemoved() hook to react to a removal event. The removal cannot be
-    stopped. The component will be removed from the DOM and from memory. Does
-    **not** trigger when the user closes the browser.
-  - Example tasks: removing event listeners.
-
 ### Slow Operations in the Build Step
 
 Components often need to fetch data from an API or local storage, which can add
@@ -237,82 +308,13 @@ Since any component can, during its `onBuild()` hook, add arbitrary HTML to the
 document, it's impossible to look downwards and know when the loading of any
 individual component nest is complete until it is *actually* complete.
 
-### Registering Components
 
-Registering a Lowrider.js component is no different than with vanilla Web
-Components, except that it uses the `Lowrider.register()` static method to do
-so. Your class must always extend Lowrider.
-
-```javascript
-import Lowrider from 'Lowrider.js'
-
-// everything that a Lowrider.js component needs
-Lowrider.register('my-element', class MyElement extends Lowrider {
-  async onSpawn() {}
-  async onBuild() {}
-  async onLoad() {}
-  async onRemoved() {}
-})
-```
 
 Components only need to be registered once, then can be used in the DOM. Trying
 to register a component that was already registered will throw in an error.
 
 Lowrider.js components can also be registered with vanilla JS, as long as the class
 extends `Lowrider`.
-
-### Creating Component Instances
-
-Once a web component has been registered with the document, instances of it can
-be created. There are two ways to do so.
-
-Typically, this is done by inserting statically typed HTML into the DOM, and
-doing so will trigger the rendering process. Elements can be inserted naked,
-with attributes, and/or with inner HTML. When an Element is inserted with inner
-HTML, Lowrider.js assumes it is being loaded with cached content, and the
-**build** event will **not** trigger.
-
-Statically typed Elements can cover most use cases, but are limited by the
-fact that HTML attributes can only hold a maximum amount of stringified data.
-
-#### Statically Typed Creation
-
-```javascript
-// naked, no cache
-document.body.innerHTML = '<my-element></my-element>'
-
-// with attributes
-document.body.innerHTML = '<my-element example-attr="hello"></my-element>'
-
-// with cached contents
-document.body.innerHTML = `<my-element>
-                             <div class="foo">
-                               <div></div>
-                             </div>
-                           </my-element>`
-```
-
-#### Programmatic Creation
-
-Creating new component instances programatically using
-`Lowrider.elementFactory()` allows us to spawn them with dynamic data like
-callback functions and variables that will be available to the component from
-the get-go.
-
-```javascript
-import Lowrider from 'Lowrider.js'
-
-// create a new component instance with pre-bound data
-let childEl = Lowrider.elementFactory('child-element', {
-  'bindings': {
-    'speak': () => { console.log('I was spawned with this function reference in my properties! Wow!') }
-  }
-})
-
-// insert child, the lifecycle events will trigger for the first time
-someElement.appendChild(childEl)
-childEl.speak()
-```
 
 The factory is designed to be used to create Lowrider.js components, but
 can also be used to create standard HTML Elements (`div`, `span`, etc) with
