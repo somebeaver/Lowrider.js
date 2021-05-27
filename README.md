@@ -381,6 +381,8 @@ have been attached to the element itself by external components.
 Calling `render()` on a `lazy-render` component will automatically disable lazy
 rendering since it's now rendered.
 
+Attribute watchers created by `this.watchAttr()` will automatically be removed.
+
 ```javascript
 myElement.render()
 ```

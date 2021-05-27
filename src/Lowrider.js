@@ -20,6 +20,10 @@
     this.built = false
     this.rendered = false
 
+    // all attribute observers are saved here, so they can be automatically
+    // disconnected on DOM removal
+    this.attrObservers = []
+
     // if a 'props' object was given to the element factory, this will preserve
     // it before creating a proxied object
     this.__preservedProps = this.props
@@ -277,6 +281,15 @@
       this.disableLazyRender()
     }
 
+    // remove all attribute observers
+    if (this.attrObservers.length) {
+      for (let observer of this.attrObservers) {
+        observer.disconnect()
+      }
+
+      this.attrObservers = []
+    }
+
     this.rendered = false
 
     if ('onRemoved' in this) {
@@ -324,6 +337,8 @@
       'attributeOldValue': true,
       'attributeFilter': attr
     })
+
+    this.attrObservers.push(observer)
 
     return observer
   }
