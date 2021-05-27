@@ -96,6 +96,9 @@ handlers on the component itself will be preserved.
 Technically, this is always a *re*render, since one cannot call this
 without the Element existing in the first place (as in, already rendered).
 
+Calling `render()` will disable lazy-render if it's enabled, but not yet
+rendered.
+
 **Kind**: instance method of [<code>Lowrider</code>](#module_Lowrider)  
 
 | Param | Type | Description |

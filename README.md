@@ -378,6 +378,9 @@ Calling this is always technically a *re*render, and it will not remove the
 instance from the DOM. This is to preserve event handlers and observers that may
 have been attached to the element itself by external components.
 
+Calling `render()` on a `lazy-render` component will automatically disable lazy
+rendering since it's now rendered.
+
 ```javascript
 myElement.render()
 ```
@@ -457,7 +460,7 @@ async onSpawn() {
 }
 ```
 
-Pro tips:
+Pro-tips:
 
 - Traditionally, "lazy loading" refers to loading images when they are in
   view. Lowrider.js takes it a step further and delays the rendering of

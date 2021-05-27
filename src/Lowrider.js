@@ -1,7 +1,7 @@
 /**
  * @module Lowrider
  */
-export default class Lowrider extends HTMLElement {
+ export default class Lowrider extends HTMLElement {
   /**
    * Fires when the custom element enters the document, whether cached or not.
    * 
@@ -197,7 +197,7 @@ export default class Lowrider extends HTMLElement {
 
     // create an observer that watches for the removal of the lazy-render attr
     this._lazyRenderAttrWatcher = this.watchAttr('lazy-render', (changes) => {
-      if (!this.hasAttribute('lazy-render')) {
+      if (this.isUsingLazyRenderMode()) {
         this.disableLazyRender()
       }
     })
@@ -212,8 +212,11 @@ export default class Lowrider extends HTMLElement {
       if (!entries[0].isIntersecting) {
         return
       }
-      
+
       //console.log('component is intersecting viewport', entries)
+
+      // disable lazy rendering now that is has triggered
+      this.disableLazyRender()
       
       if (await this.shouldBuild()) {
         //console.log('building component after intersection')
@@ -221,8 +224,6 @@ export default class Lowrider extends HTMLElement {
       }
 
       setTimeout(async () => {
-        this.disableLazyRender()
-
         await this.load()
         this.rendered = true
       }, 0)
@@ -261,11 +262,20 @@ export default class Lowrider extends HTMLElement {
    * Technically, this is always a *re*render, since one cannot call this
    * without the Element existing in the first place (as in, already rendered).
    *
+   * Calling `render()` will disable lazy-render if it's enabled, but not yet
+   * rendered.
+   *
    * @param {*} [opts] - Optionally give any argument, and that argument will be
    * given to `onSpawn`, `onBuild`, and `onLoad`.
    */
   async render(opts) {
     if (this.locked) return
+
+    // if render() is manually invoked before the lazy-render triggered, we can
+    // disable the lazy rendering. do this before awaiting anything here.
+    if (this.isUsingLazyRenderMode()) {
+      this.disableLazyRender()
+    }
 
     this.rendered = false
 
