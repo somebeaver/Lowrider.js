@@ -404,12 +404,9 @@ Note that the `spawn` and `load` events cannot be skipped.
 
 ```javascript
 class StatusIndicator extends Lowrider {
+  // disable caching by always performing a build on every render
   shouldBuild() {
-    if (statusHasChangedSinceLastBuild) {
-      return true
-    } else {
-      return false
-    }
+    return true
   }
 }
 ```
