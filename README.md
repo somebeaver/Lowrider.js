@@ -477,13 +477,12 @@ Pro-tips:
 
 ### Render Queueing
 
-*It is important to understand how rendering in series vs parallel works before
-using render queueing. Render queueing is currently an experimental feature.*
+*Render queueing is currently an experimental feature.*
 
-Render queueing is an advanced feature that minimizes the impact of rendering a
-large amount of components at once. It is designed for use with parallel
-rendering, typically when the goal is to reduce the number of concurrent network
-requests.
+Render queueing is an advanced optimization that minimizes the impact of
+rendering a large amount of components at once. It is designed for use with
+[parallel rendering](Rendering in Parallel), typically when the goal is to
+reduce the number of concurrent network requests.
 
 Render queueing is much like lazy loading - the component enters the DOM,
 `spawn` is triggered, then it waits.
