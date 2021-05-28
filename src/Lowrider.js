@@ -49,16 +49,11 @@
 
     // when NOT using lazy-render, proceed with normal rendering
 
-    // only trigger build if we have to
-    if (await this.shouldBuild()) {
-      await this.build()
+    if (this.isUsingRenderQueue()) {
+      this.addToRenderQueue()
+    } else {
+      this._finishRender()
     }
-
-    // wait one tick so that inner HTML has been inserted into the DOM
-    setTimeout(async () => {
-      await this.load()
-      this.rendered = true
-    }, 0)
   }
 
   /**
@@ -78,30 +73,6 @@
     if ('onRemoved' in this) {
       this.onRemoved()
     }
-  }
-
-  /**
-   * Returns a new proxied object for use in this.props. 
-   * 
-   * @returns {object}
-   * @ignore
-   */
-  _newPropsProxiedObject() {
-    let newProxiedObject = {}
-
-    let handlers = {
-      'set': (target, key, newValue) => {
-        target[key] = newValue
-
-        for (let child of this.querySelectorAll(`[data-prop="${key}"]`)) {
-          child.innerHTML = newValue
-        }
-        
-        return true
-      }
-    }
-
-    return new Proxy(newProxiedObject, handlers)
   }
 
   /**
@@ -183,6 +154,139 @@
   }
 
   /**
+   * Returns a new proxied object for use in this.props. 
+   * 
+   * @returns {object}
+   * @ignore
+   */
+  _newPropsProxiedObject() {
+    let newProxiedObject = {}
+
+    let handlers = {
+      'set': (target, key, newValue) => {
+        target[key] = newValue
+
+        for (let child of this.querySelectorAll(`[data-prop="${key}"]`)) {
+          child.innerHTML = newValue
+        }
+        
+        return true
+      }
+    }
+
+    return new Proxy(newProxiedObject, handlers)
+  }
+
+  /**
+   * Lowrider needs globals for some features like the render-queue's. This
+   * method will ensure that the globals exist. Globals will only be inited if
+   * any Lowrider instance uses a feature that depends on them.
+   */
+  _ensureGlobals() {
+    if (!('LowriderGlobals' in window)) {
+      window.LowriderGlobals = {
+        'renderQueues': {}
+      }
+    }
+  }
+
+  /**
+   * Checks if this instance currently has render queueing enabled.
+   */
+  isUsingRenderQueue() {
+    return this.hasAttribute('render-queue')
+  }
+
+  /**
+   * Inserts a new render queue object with the given name into the Lowrider
+   * globals.
+   *
+   * the queue object contains an array for the queue, a flag that lets us know
+   * if the queue is currently running, and the queue itself.
+   *
+   * The runner is stored in the global so that no single component instance
+   * (Element) gets stuck with running the runner.
+   * 
+   * @param {string} name
+   */
+  createRenderQueue(name) {
+    if (name in window.LowriderGlobals.renderQueues) {
+      throw new Error(`Render queue ${name} already exists`)
+    }
+
+    console.log(`Creating render queue ${name}`)
+
+    window.LowriderGlobals.renderQueues[name] = {
+      'queue': [],
+      'running': false,
+      'runner': async () => {
+        if (window.LowriderGlobals.renderQueues[name].running) {
+          console.log('cant run twice, normal')
+          return
+        }
+
+        window.LowriderGlobals.renderQueues[name].running = true
+        let queue = window.LowriderGlobals.renderQueues[name].queue
+
+        // as long as there are items in the queue, work with the first one
+        // then remove it from the queue
+        while (queue.length) {
+          let item = queue[0]
+
+          item.classList.remove('in-render-queue')
+          await item._finishRender()
+          queue.splice(0, 1)
+
+          console.log(`render queue ${name} rendered item`)
+        }
+
+        window.LowriderGlobals.renderQueues[name].running = false
+        console.log(`Render queue ${name} cleared!`)
+      }
+    }
+  }
+
+  /**
+   * Adds this Element to the render queue.
+   */
+  addToRenderQueue() {
+    this._ensureGlobals()
+
+    // if no render queue name is given, use the generic one
+    let name = this.getAttribute('render-queue') || 'default'
+
+    // maybe init empty queue object
+    if (!(name in window.LowriderGlobals.renderQueues)) {
+      this.createRenderQueue(name)
+    }
+
+    window.LowriderGlobals.renderQueues[name].queue.push(this)
+
+    this.classList.add('in-render-queue')
+
+    setTimeout(() => {
+      this._runRenderQueue(name)
+    }, 0)
+  }
+
+  /**
+   * Begins running a render queue if it not already running. It is safe to call
+   * this over and over.
+   * 
+   * @param {string} name - Render queue name.
+   * @ignore
+   */
+   _runRenderQueue(name) {
+    if (!(name in window.LowriderGlobals.renderQueues)) throw new Error(`Render queue ${name} does not exist`)
+
+    // queue is already running
+    if (window.LowriderGlobals.renderQueues[name].running) return
+
+    // this loop will continue until the queue has completely rendered
+    window.LowriderGlobals.renderQueues[name].runner()
+   }
+
+  /**
    * Checks if this instance currently has lazy-render mode enabled.
    */
   isUsingLazyRenderMode() {
@@ -221,16 +325,12 @@
 
       // disable lazy rendering now that is has triggered
       this.disableLazyRender()
-      
-      if (await this.shouldBuild()) {
-        //console.log('building component after intersection')
-        await this.build()
-      }
 
-      setTimeout(async () => {
-        await this.load()
-        this.rendered = true
-      }, 0)
+      if (this.isUsingRenderQueue()) {
+        this.addToRenderQueue()
+      } else {
+        this._finishRender()
+      }
     })
     this._intersectionObserver.observe(this)
   }
@@ -241,7 +341,7 @@
    * need to call this unless your intention is to disable the lazy render
    * callback before it has triggered.
    */
-   disableLazyRender() {
+  disableLazyRender() {
     if (!('_intersectionObserver' in this) || !(this._intersectionObserver instanceof IntersectionObserver)) {
       throw new Error('Must be observing visibility')
     }
@@ -255,6 +355,34 @@
     if (this.hasAttribute('lazy-render')) {
       this.removeAttribute('lazy-render')
     }
+  }
+
+  /**
+   * The build and load steps are coupled together with this method, with the
+   * load step happening one tick after.
+   * 
+   * When using lazy-rendering, a component will be spawned, but the build and
+   * load steps will be put on hold until the component is visible. When it is,
+   * it will call this.
+   * 
+   * The connectedCallback() also uses this.
+   */
+  _finishRender() {
+    // one promise to reolve when the entire component has rendered
+    return new Promise(async (renderResolve) => {
+      // only trigger build if we have to
+      if (await this.shouldBuild()) {
+        await this.build()
+      }
+
+      // wait one tick so that inner HTML has been inserted into the DOM
+      setTimeout(async () => {
+        await this.load()
+        this.rendered = true
+
+        renderResolve(true)
+      }, 0)
+    })
   }
 
   /**
@@ -307,6 +435,8 @@
     }, 0)
 
     this.rendered = true
+
+    return true
   }
 
   /**

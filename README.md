@@ -9,8 +9,9 @@ implementing a **[lifecycle](#lifecycle)** that **makes it easy to manage their
 state** in single-page applications.
 
 Lowrider.js also provides unopinionated functionality for building applications:
- - [Web Component state](#caching)
  - [Lazy rendering](#lazy-rendering)
+ - [Render queues](#render-queues)
+ - [Web Component state](#caching)
  - [File drag and drop (drop zone)](#drop-area)
  - [Attribute watching](#attribute-watching)
  - [Infinite scroll](#infinite-scroll)
@@ -166,7 +167,7 @@ document.body.innerHTML = `<my-element>
 
 #### Programmatic Creation
 
-Creating new component instances programatically using
+Creating new component instances programmatically using
 `Lowrider.elementFactory()` allows us to spawn them with dynamic data like
 callback functions and variables that will be available to the component from
 the get-go.
@@ -473,6 +474,101 @@ Pro-tips:
   that has some width/height, or make sure that prior Elements have rendered and
   pushed the page down enough that the user must scroll, causing Elements to
   come in one-by-one.
+
+### Render Queueing
+
+*It is important to understand how rendering in series vs parallel works before
+using render queueing. Render queueing is currently an experimental feature.*
+
+Render queueing is an advanced feature that minimizes the impact of rendering a
+large amount of components at once. It is designed for use with parallel
+rendering, typically when the goal is to reduce the number of concurrent network
+requests.
+
+Render queueing is much like lazy loading - the component enters the DOM,
+`spawn` is triggered, then it waits.
+
+Lazily rendered components will only be added to the render queue when the lazy
+render triggers.
+
+#### The Problem
+
+Imagine component `A` which is designed to create any number of child component
+`B`'s. Each `B` may make a few network API calls.
+
+When a large number of `B`'s must be added to `A` at once, the most seemingly
+straightforward method for reducing the cost of this operation would be to
+throttle the insertion of `B`'s at `A` level. That is to say, have `A`
+itself perform the throttling of `B` Element DOM insertions.
+
+There are a few issues with this approach. `A`'s complexity was just increased,
+the throttling code cannot easily be shared with other components, and what
+happens if suddenly `A` needs to inject `C`'s and `D`'s too?
+
+#### The Solution
+
+Lowrider.js offers render queueing as a solution for inserting any number of
+parallel components. Render queueing is very simple to use, requires no
+restructuring of your component, and is compatable with lazy rendering. Queues
+are also not bound to any single component in the DOM.
+
+To enable it, just use the attribute.
+
+```html
+<!-- use the default queue -->
+<my-component render-queue></my-component>
+
+<!-- use a named queue -->
+<my-component render-queue="network-pipeline"></my-component>
+```
+
+There are also a few ways to use it programatically. For lazy rendering
+compatability, add the attribute on spawn.
+
+```javascript
+async onSpawn() {
+  this.setAttribute('render-queue')
+}
+```
+
+There is also...
+
+```javascript
+this.addToRenderQueue()
+```
+
+...which will disable lazy rendering, add the Element to the queue, and ensure
+that the queue is processing items.
+
+#### Named Render Queues
+
+Any name can be given to a render queue and that queue will be created on
+demand. Queues are global and can be used by any Element in the DOM.
+
+If no name is given, the name will be "default".
+
+#### Once it's in the Queue
+
+Once a component has been added to the queue, it will get the class
+`in-render-queue`. As soon any single item is added to the queue, processing of
+the queue begins.
+
+The queue runner triggers the `build` and `load` events of the first component
+and waits for them to finish before removing the component from the queue and
+moving to the next.
+
+Once the queue is empty, it will remain available for future use until the end
+of the browser session.
+
+#### Queue Blocking
+
+Be wary of blocking the queue. For best results, separate queues by resource
+type.
+
+For example, queueing components with slow internet requests in front of
+components with quick local file reads would be very bad. Use one queue for
+*somedomain.com* and another for *file://C:/foo/bar.txt* (assuming Electron
+environment).
 
 ### Attribute Watching
 
