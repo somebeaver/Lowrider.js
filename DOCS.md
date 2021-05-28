@@ -8,14 +8,11 @@
         * [.build([renderOpts])](#module_Lowrider+build)
         * [.load()](#module_Lowrider+load)
         * [.shouldBuild()](#module_Lowrider+shouldBuild)
-        * [._ensureGlobals()](#module_Lowrider+_ensureGlobals)
         * [.isUsingRenderQueue()](#module_Lowrider+isUsingRenderQueue)
-        * [.createRenderQueue(name)](#module_Lowrider+createRenderQueue)
         * [.addToRenderQueue()](#module_Lowrider+addToRenderQueue)
         * [.isUsingLazyRenderMode()](#module_Lowrider+isUsingLazyRenderMode)
         * [.enableLazyRender()](#module_Lowrider+enableLazyRender)
         * [.disableLazyRender()](#module_Lowrider+disableLazyRender)
-        * [._finishRender()](#module_Lowrider+_finishRender)
         * [.render([opts])](#module_Lowrider+render)
         * [.unlock()](#module_Lowrider+unlock)
         * [.watchAttr(attr)](#module_Lowrider+watchAttr)
@@ -67,38 +64,12 @@ by checking if there is any child Element. If none exists, we must render.
 Your class may override this.
 
 **Kind**: instance method of [<code>Lowrider</code>](#module_Lowrider)  
-<a name="module_Lowrider+_ensureGlobals"></a>
-
-### lowrider.\_ensureGlobals()
-Lowrider needs globals for some features like the render-queue's. This
-method will ensure that the globals exist. Globals will only be inited if
-any Lowrider instance uses a feature that depends on them.
-
-**Kind**: instance method of [<code>Lowrider</code>](#module_Lowrider)  
 <a name="module_Lowrider+isUsingRenderQueue"></a>
 
 ### lowrider.isUsingRenderQueue()
 Checks if this instance currently has render queueing enabled.
 
 **Kind**: instance method of [<code>Lowrider</code>](#module_Lowrider)  
-<a name="module_Lowrider+createRenderQueue"></a>
-
-### lowrider.createRenderQueue(name)
-Inserts a new render queue object with the given name into the Lowrider
-globals.
-
-the queue object contains an array for the queue, a flag that lets us know
-if the queue is currently running, and the queue itself.
-
-The runner is stored in the global so that no single component instance
-(Element) gets stuck with running the runner.
-
-**Kind**: instance method of [<code>Lowrider</code>](#module_Lowrider)  
-
-| Param | Type |
-| --- | --- |
-| name | <code>string</code> | 
-
 <a name="module_Lowrider+addToRenderQueue"></a>
 
 ### lowrider.addToRenderQueue()
@@ -126,19 +97,6 @@ Disables lazy-render mode by deleting the observers and ensuring that the
 attribute is gone. This is normally handled automatically, so you don't
 need to call this unless your intention is to disable the lazy render
 callback before it has triggered.
-
-**Kind**: instance method of [<code>Lowrider</code>](#module_Lowrider)  
-<a name="module_Lowrider+_finishRender"></a>
-
-### lowrider.\_finishRender()
-The build and load steps are coupled together with this method, with the
-load step happening one tick after.
-
-When using lazy-rendering, a component will be spawned, but the build and
-load steps will be put on hold until the component is visible. When it is,
-it will call this.
-
-The connectedCallback() also uses this.
 
 **Kind**: instance method of [<code>Lowrider</code>](#module_Lowrider)  
 <a name="module_Lowrider+render"></a>

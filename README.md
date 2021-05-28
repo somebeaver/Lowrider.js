@@ -10,7 +10,7 @@ state** in single-page applications.
 
 Lowrider.js also provides unopinionated functionality for building applications:
  - [Lazy rendering](#lazy-rendering)
- - [Render queues](#render-queues)
+ - [Render queueing](#render-queueing)
  - [Web Component state](#caching)
  - [File drag and drop (drop zone)](#drop-area)
  - [Attribute watching](#attribute-watching)

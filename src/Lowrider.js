@@ -181,6 +181,8 @@
    * Lowrider needs globals for some features like the render-queue's. This
    * method will ensure that the globals exist. Globals will only be inited if
    * any Lowrider instance uses a feature that depends on them.
+   * 
+   * @ignore
    */
   _ensureGlobals() {
     if (!('LowriderGlobals' in window)) {
@@ -208,8 +210,9 @@
    * (Element) gets stuck with running the runner.
    * 
    * @param {string} name
+   * @ignore
    */
-  createRenderQueue(name) {
+  _createRenderQueue(name) {
     if (name in window.LowriderGlobals.renderQueues) {
       throw new Error(`Render queue ${name} already exists`)
     }
@@ -257,7 +260,7 @@
 
     // maybe init empty queue object
     if (!(name in window.LowriderGlobals.renderQueues)) {
-      this.createRenderQueue(name)
+      this._createRenderQueue(name)
     }
 
     window.LowriderGlobals.renderQueues[name].queue.push(this)
@@ -366,6 +369,8 @@
    * it will call this.
    * 
    * The connectedCallback() also uses this.
+   * 
+   * @ignore
    */
   _finishRender() {
     // one promise to reolve when the entire component has rendered
