@@ -567,8 +567,26 @@ type.
 
 For example, queueing components with slow internet requests in front of
 components with quick local file reads would be very bad. Use one queue for
-*somedomain.com* and another for *file://C:/foo/bar.txt* (assuming Electron
+`http://foo.com/bar.txt` and another for `file://~/foo/bar.txt` (assuming Electron
 environment).
+
+#### When to use Render Queues
+
+Render queues are not designed to manage client computational resources, instead
+they're designed to **reduce network saturation**. The browser can easily handle
+adding 100 new elements to the DOM; the issues begin when those 100 elements
+require a few network API calls each, resulting in large amount of queries
+hitting your API at once.
+
+It is recommended to optimize using [lazy rendering](#lazy-rendering) first.
+Trying to use render queueing without using lazy rendering at all will probably
+just end up as psuedo lazy rendering using queues.
+
+If you find your lazily rendered components are still coming in too fast for
+your API, then it's now a good time to try and use render queues. Ultimately,
+your component will spend more time in a loading state since clearly there is a
+bottleneck, but your components will hit your API one-by-one, instead of all at
+once.
 
 ### Attribute Watching
 
