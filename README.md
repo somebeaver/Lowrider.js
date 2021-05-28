@@ -481,7 +481,7 @@ Pro-tips:
 
 Render queueing is an advanced optimization that minimizes the impact of
 rendering a large amount of components at once. It is designed for use with
-[parallel rendering](Rendering in Parallel), typically when the goal is to
+[parallel rendering](#rendering-in-parallel), typically when the goal is to
 reduce the number of concurrent network requests.
 
 Render queueing is much like lazy loading - the component enters the DOM,
