@@ -56,7 +56,7 @@ the need for a virtual DOM**.
 
 #### Lifecycle Events
 
-0. *An instance of the component (custom element that extends Lowrider) is inserted into the DOM.*
+0. *An instance of the component (custom element that extends `Lowrider`) is inserted into the DOM.*
 1. **`spawn`** - Immediately, the `spawn` event fires. The component knows of
    its own existance and the document in which it lives.
 2. **`build`** - Immediately after spawning is completed, the component enters the
@@ -80,7 +80,8 @@ invoked unless you want to *re*render. More on the [render method](#render).
 
 Hooks are called by Lowrider.js when certain lifecycle events happen. Hooks
 should always be `async` functions, or if not, must return a `Promise`. Have the
-hook return false to stop rendering the component.
+hook return or resolve false (*not* `reject()`) to stop rendering the
+component.
 
 For each lifecycle event, there is a hook.
 
@@ -114,7 +115,7 @@ For each lifecycle event, there is a hook.
   - Use the onRemoved() hook to react to a removal event. The removal cannot be
     stopped. The component will be removed from the DOM and from memory. Does
     not trigger when the user closes the browser.
-  - Example tasks: removing event listeners.
+  - Example tasks: removing event listeners on other non-child elements.
   - **Do not** use this to save on-close state.
 
 ### Caching
@@ -225,6 +226,8 @@ let childEl = Lowrider.elementFactory('child-element', {
 
 // insert child, the lifecycle events will trigger for the first time
 someElement.appendChild(childEl)
+
+// all bindingd are immediately available
 childEl.speak()
 ```
 
@@ -233,6 +236,10 @@ can also be used to create standard HTML Elements (`div`, `span`, etc) with
 custom properties.
 
 ### Order of Events / Rendering in Series vs. Parallel
+
+*Note that this section is not related to lazy rendering or render queueing.
+This section is a detailed description of the natural behavior of Lowrider.js
+components, which is actually very similar to vanilla web components.*
 
 Lowrider.js takes a top-down approach to UI rendering. It is import to
 understand how events trigger, when they trigger, and what the events are
