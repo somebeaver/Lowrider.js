@@ -149,7 +149,7 @@ things are saved as attributes.
 
 Note that Lowrider.js is not tested for use with the shadow DOM.
 
-### Registering Components
+## Registering Components
 
 Registering a Lowrider.js component is no different than with vanilla Web
 Components, except that it uses the `Lowrider.register()` static method to do
@@ -235,7 +235,7 @@ The factory is designed to be used to create Lowrider.js components, but
 can also be used to create standard HTML Elements (`div`, `span`, etc) with
 custom properties.
 
-### Order of Events / Rendering in Series vs. Parallel
+## Detailed Rendering Breakdown / Rendering in Series vs. Parallel
 
 *Note that this section is not related to lazy rendering or render queueing.
 This section is a detailed description of the natural behavior of Lowrider.js
@@ -294,7 +294,8 @@ case, it inserts inner HTML.
 
 With the top-down approach, the root component begins a chain of component
 injection and rendering that continues until the initial state of the app is
-ready.
+ready. Each component goes through its own rendering process, independent of
+others.
 
 #### Rendering in Series
 
