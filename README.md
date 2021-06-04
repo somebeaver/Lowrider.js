@@ -609,13 +609,20 @@ approach in general. The parent component's complexity was just increased, the
 throttling code cannot easily be shared with other components, and what happens
 if suddenly new types of network-reliant components are introduced?
 
-In general, it's a bad idea to have any one component be responsible for the
+Not to mention the biggest problem of all... if a parent component is throttling
+DOM insertions, then those components literally don't exist at all. They cannot
+be counted or interacted with, but *should* exist since something told the
+parent component to render them in the first place. Since there is no virtual
+DOM, getting components into the DOM in a timely manner, but also not pounding
+the network, is a critically important task.
+
+And in general, it's a bad idea to have any one component be responsible for the
 smooth rendering of another component. It creates an avoidable coupling.
 
 #### The Solution
 
 Lowrider.js offers render queueing as a solution for inserting any number of
-expensive components. Render queueing is very simple to use, requires no
+network intensive components. Render queueing is very simple to use, requires no
 restructuring of your component, and is compatable with lazy rendering.
 
 The queues themselves are not bound to any single component in the DOM, and
@@ -649,15 +656,16 @@ someElement.addToRenderQueue()
 #### Once it's in the Queue
 
 Once a component has been added to the queue, it will get the class
-`in-render-queue`. Queue's automatically detect when an item has been entered,
+`in-render-queue`. Queue's automatically detect when >=1 item is in the queue,
 and the queue will begin processing items.
 
 The queue runner triggers the `build` and `load` events of the first component
 and waits for them to finish before removing the component from the queue and
 moving on to the next item.
 
-Once the queue is empty, it will stop and remain available for future use until
-the end of the browser session.
+Once the queue is empty, the queue runner will pause and remain available for
+future use until the end of the browser session. It is not possible to delete a
+queue once it has been made.
 
 #### Queue Blocking
 
