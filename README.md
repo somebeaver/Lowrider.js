@@ -1,29 +1,28 @@
 # Lowrider.js
 
-*To see Lowrider.js in action, check out the
-[Cardinal apps](https://cardinalapps.xyz).* 
+*To see Lowrider.js in action, check out [Cardinal
+apps](https://cardinalapps.xyz).*
 
 **Lowrider.js** is a small dependency-free ES6 JavaScript library that enhances
 [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components) by
-implementing a **[lifecycle](#lifecycle)** that **makes it easy to manage their
-state** in single-page applications.
+implementing a **[lifecycle](#lifecycle)** that turns them into stateful,
+reusable, powerful components for building single-page applications.
 
-Lowrider.js also provides unopinionated functionality for building applications:
+Lowrider.js also provides unopinionated functionality for:
  - [Lazy rendering](#lazy-rendering)
  - [Render queueing](#render-queueing)
- - [Web Component state](#caching)
- - [File drag and drop (drop zone)](#drop-area)
+ - [User interaction detection](#interacting-state)
+ - [Component factory](#programmatic-creation)
+ - [Easy string insertion](#using-the-props-property)
  - [Attribute watching](#attribute-watching)
  - [Infinite scroll](#infinite-scroll)
- - [User interaction detection](#interacting-state)
+ - [File drag and drop (drop zone)](#drop-area)
  - Singletons
- - HTML drag and drop
  - And more
 
 ## API Reference
 
-A reference of all public Lowrider.js methods is available in
-**[DOCS.md](DOCS.md)**.
+For documentation about Lowrider.js methods, see **[DOCS.md](DOCS.md)**.
 
 ## Terminology
 
@@ -48,10 +47,12 @@ DOM removal; everything that happens in between is the lifecycle. Reacting to
 **[lifecycle events](#lifecycle-events)** with **[hooks](#hooks)** is how
 Lowrider.js components come to life.
 
-Lifecycle events can only happen while the component exists in the DOM, and
-Lowrider.js's true power is in how it automatically manages these events to
-**maintain component state**, **optimize rendering**, and **remove the need for
-a virtual DOM**.
+Just like vanilla web components, Lowrider.js components only exist in memory
+while they exist in the DOM. As such, lifecycle events can only happen while the
+component exists in the DOM, and Lowrider.js's true power is in how it
+automatically manages these events to **maintain component state** while the
+component enters/exits/reenters the DOM, **optimize rendering**, and **remove
+the need for a virtual DOM**.
 
 #### Lifecycle Events
 
@@ -101,14 +102,51 @@ For each lifecycle event, there is a hook.
 3. **`onLoad`**
   - Use the onLoad() hook to perform after-build tasks and to interact with
     child HTML and components. This hook should be designed to work with the
-    component in any state, as the component may have been loaded with cached
-    contents.
-  - Example tasks: manipulating inner HTML.
+    component in any expected state, as the component may have been loaded with
+    cached contents.
+  - Example tasks: manipulating inner HTML, registering event listeners on child
+    DOM nodes.
+  - **Do not** perform expensive tasks.
+  - **Do** make sure that this step is prepared to work with the inner HTML in
+    any state. For example, if a component contains pagination, it may now be on
+    any page since user interaction state will be maintained with the cache.
 4. **`onRemoved`**
   - Use the onRemoved() hook to react to a removal event. The removal cannot be
     stopped. The component will be removed from the DOM and from memory. Does
-    **not** trigger when the user closes the browser.
+    not trigger when the user closes the browser.
   - Example tasks: removing event listeners.
+  - **Do not** use this to save on-close state.
+
+### Caching
+
+Since web components cannot exist outside of the DOM, the components themselves
+cannot be tasked with caching their own contents. Instead, that responsibility
+typically falls to the UI's router or a purpose built module.
+
+Lowrider.js is flexible and can work with anything that can stringify HTML. As
+long as the component author utilizes the lifecycle hooks properly, Lowrider.js
+components can dissappear from the DOM and memory, then reappear as if they
+never left at all. Of course, while they're gone, their code won't execute.
+
+Lowrider.js was designed for use with
+[router.js](https://github.com/somebeaver/router.js), an open source
+unopinionated UI router for single-page applications written by the same
+developer, and optimized for use with Lowrider.js.
+
+#### But Really, Where Does the State Go?
+
+If the component is removed from memory, how can it come back in the same state?
+It's really just a mix of Lowrider.js features and component authoring patterns.
+
+The job of the caching module is to preserve a component by saving its
+`outerHTML` property. It's crucial to save its attributes and its inner HTML.
+Together, they *are* the state, and a properly authored component should be able
+to initialize itself using that state, or from scratch. It is up to the
+developer to ensure that they don't create any important dynamic component
+properties that get lost when the instance is removed; instead, make sure those
+things are saved as attributes.
+
+Note that Lowrider.js is not tested for use with the shadow DOM.
 
 ### Registering Components
 
@@ -119,13 +157,16 @@ so. Your class must always extend Lowrider.
 ```javascript
 import Lowrider from 'Lowrider.js'
 
-// everything that a Lowrider.js component needs
-Lowrider.register('my-element', class MyElement extends Lowrider {
+// everything that a basic Lowrider.js component needs
+class MyElement extends Lowrider {
   async onSpawn() {}
   async onBuild() {}
   async onLoad() {}
   async onRemoved() {}
-})
+}
+
+// register it with the browser
+Lowrider.register('my-element', MyElement)
 ```
 
 Components only need to be registered once, then can be used in the DOM. Trying
@@ -318,38 +359,6 @@ into the hooks properly.
 Since any component can, during its `onBuild()` hook, add arbitrary HTML to the
 document, it's impossible to look downwards and know when the loading of any
 individual component nest is complete until it is *actually* complete.
-
-### Caching
-
-Since web components cannot exist outside of the DOM, the components themselves
-cannot be tasked with caching their own contents. Instead, that responsibility
-typically falls to the UI's router, a purpose built module, or simply the
-browser if there is no single-page application context.
-
-Lowrider.js is flexible and can work with anything that can stringify HTML. As
-long as the component author utilizes the lifecycle hooks properly, Lowrider.js
-components can dissappear from the DOM and memory, then reappear as if they
-never left at all. Of course, while they're gone, their code won't execute.
-
-Lowrider.js was designed for use with
-[router.js](https://github.com/somebeaver/router.js), an open source
-unopinionated UI router for single-page applications written by the same developer,
-and optimized for use with Lowrider.js.
-
-#### But Really, Where Does the State Go?
-
-If the component is removed from memory, how can it come back in the same state?
-The answer is a mix of Lowrider.js features and component authoring patterns.
-
-The job of the caching module is to preserve a component by saving its
-`outerHTML` property. It's crucial to save its attributes and its inner HTML.
-Together, they *are* the state, and a properly authored component should be able
-to initialize itself using that state, or from scratch. It is up to the
-developer to ensure that they don't create any important Element object
-properties that get lost when the instance is removed; instead, make sure those
-things are saved as attributes.
-
-Note that Lowrider.js is not tested for use with the shadow DOM.
 
 ### Using the `props` Property
 
