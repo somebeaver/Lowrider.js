@@ -17,7 +17,7 @@
         * [.unlock()](#module_Lowrider+unlock)
         * [.watchAttr(attr)](#module_Lowrider+watchAttr)
         * [.supportInfiniteScroll(cb, viewSelector)](#module_Lowrider+supportInfiniteScroll) ⇒ <code>function</code>
-        * [.supportInteractingState(leftClickChildren)](#module_Lowrider+supportInteractingState)
+        * [.supportInteractingState()](#module_Lowrider+supportInteractingState)
         * [.enterInteractingState()](#module_Lowrider+enterInteractingState)
         * [.enableDropArea([innerEl], onDrop)](#module_Lowrider+enableDropArea)
     * _static_
@@ -155,7 +155,7 @@ unregistered later.
 
 <a name="module_Lowrider+supportInteractingState"></a>
 
-### lowrider.supportInteractingState(leftClickChildren)
+### lowrider.supportInteractingState()
 This function registers event listeners on the web component that help
 determine when a user is interacting with it.
 
@@ -171,12 +171,11 @@ component, they will invoke enterInteractingState() on it, which can also
 be called manually.
 
 **Kind**: instance method of [<code>Lowrider</code>](#module_Lowrider)  
-**Paran**: <code>Element</code> [interactionEl] - Use this child Element instead of the
-the entire component as the listener for left/right clicks.  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| leftClickChildren | <code>array</code> | An array of CSS selectors for child Elements that, when clicked, make this instance enter an interacting state. For example, the user may be allowed to left click on the child images of this instance, but when they click on a specific button should be considered interacting. |
+| [options.rightClickEls] | <code>Array</code> | Elements that accept right clicks for entering the interacting state. Defaults to the entire Lowrider Element. |
+| [options.leftClickEls] | <code>Array</code> | Elements that accept left clicks for entering the interacting state. Defaults to all child "dot-menu" Elements (for Cardinal purposes). |
 
 <a name="module_Lowrider+enterInteractingState"></a>
 

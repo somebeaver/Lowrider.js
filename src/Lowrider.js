@@ -520,13 +520,11 @@
    * component, they will invoke enterInteractingState() on it, which can also
    * be called manually.
    *
-   * @paran {Element} [interactionEl] - Use this child Element instead of the
-   * the entire component as the listener for left/right clicks.
-   * @param {array} leftClickChildren - An array of CSS selectors for child
-   * Elements that, when clicked, make this instance enter an interacting state.
-   * For example, the user may be allowed to left click on the child images of
-   * this instance, but when they click on a specific button should be
-   * considered interacting.
+   * @param {Array} [options.rightClickEls] - Elements that accept right clicks
+   * for entering the interacting state. Defaults to the entire Lowrider Element.
+   * @param {Array} [options.leftClickEls] - Elements that accept left clicks
+   * for entering the interacting state. Defaults to all child "dot-menu"
+   * Elements (for Cardinal purposes).
    */
   supportInteractingState(options = {}) {
     if (!('rightClickEls' in options)) options.rightClickEls = [this]
