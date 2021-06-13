@@ -227,7 +227,7 @@ let childEl = Lowrider.elementFactory('child-element', {
 // insert child, the lifecycle events will trigger for the first time
 someElement.appendChild(childEl)
 
-// all bindingd are immediately available
+// all bindings are immediately available
 childEl.speak()
 ```
 
@@ -373,31 +373,26 @@ initialize the HTML in a loading state, then in the same hook, perform the
 expensive queries. Once the HTML is inserted, finish the `onBuild()` hook by
 removing the loading state.
 
-Example:
-
-```javascript
-// in the component's inner HTML:
-<p data-prop="listName"></p>
-
-// in the component's onLoad() hook; this will insert "Playlist 1" into the DOM
-this.props.listName = 'Playlist 1'
-```
-
 ## Features
 
 ### Render
 
-Lowrider.js provides a `render()` function that allows components to be rerendered.
-Calling this is always technically a *re*render, and it will not remove the
-instance from the DOM. This is to preserve event handlers and observers that may
-have been attached to the element itself by external components.
+Lowrider.js provides a `render()` function that allows components to be
+rerendered. Calling this is always technically a *re*render, and it will not
+remove the instance from the DOM; this is to preserve event handlers, observers,
+and callbacks that may have been attached to the element itself by external
+components.
 
-Calling `render()` on a `lazy-render` component will automatically disable lazy
-rendering since it's now rendered.
+Calling `render()` on a `lazy-render` component that has not yet rendered will
+automatically disable lazy rendering since it's now rendered.
 
 Attribute watchers created by `this.watchAttr()` will automatically be removed.
 
+Under the hood, `render()` will call this instance's `onRemoved` hook, then
+trigger the `spawn`, `build` (maybe), and `load` events.
+
 ```javascript
+// trigger a render
 myElement.render()
 ```
 
@@ -411,8 +406,15 @@ Lowrider.js will ensure that props are applied properly when using the factory.
 **Do not overwrite the `props` property itself, it is a special proxied
 object.**
 
-Under the hood, `render()` will call this instance's `onRemoved` hook, then
-trigger the `spawn`, `build` (maybe), and `load` events.
+Example:
+
+```javascript
+// in the component's inner HTML:
+<p data-prop="listName"></p>
+
+// in the component's onLoad() hook; this will insert "Playlist 1" into the DOM
+this.props.listName = 'Playlist 1'
+```
 
 ### Build Determiner (`shouldBuild()`)
 
@@ -490,13 +492,16 @@ Lazy loading pro-tips:
 - Because the entire component is delayed, it will be a 0px/0px sized DOM
   Element until it is render time. If you inject 1000 lazy-render Elements, they
   will still all render in parallel at the same time because they're all stacked
-  on the same pixel in the viewport. For the best user experience, try to
-  paginate data into small groups, have Elements initialize in a loading state
-  that has some width/height, or make sure that prior Elements have rendered and
+  on the same pixel in the viewport. For the best user experience, try to have
+  Elements initialize in a loading state that has some width/height, or paginate
+  data into small groups, or make sure that prior Elements have rendered and
   pushed the page down enough that the user must scroll, causing Elements to
   come in one-by-one.
 
 ### Attribute Watching
+
+Callbacks for watching attributes. Useful for watching *other* Lowrider.js
+components too.
 
 ```javascript
 async onSpawn() {
@@ -506,15 +511,18 @@ async onSpawn() {
 }
 ```
 
-*Caution!* Updating a watched attribute value in a watched attribute callback
-will result in an infinite loop.
+*Caution!* Updating a watched attribute value in its callback will result in an
+infinite loop.
 
 ### Infinite Scroll
+
+Easily detect when a user has scrolled to close enough to the bottom of a
+component that it's time to load more content.
 
 ```javascript
 async onSpawn() {
   this.supportInfiniteScroll(() => {
-    console.log('user scrolled to near the bottom of this element')
+    console.log('User scrolled to near the bottom of this element')
   })
 }
 ```
@@ -522,7 +530,7 @@ async onSpawn() {
 ### Interacting State
 
 User interaction detection lets the component know when the user is interacting
-with it in ways that go beyond the native `focus` listener.
+with it in ways that go beyond the native `focus` DOM events.
 
 "Interacting state" is defined as:
 
@@ -530,8 +538,9 @@ with it in ways that go beyond the native `focus` listener.
 - Pressing tab and landing directly on the component Element or any child Element
 
 The Element will stay in the interacting state while the user continues to
-interact with it, until the user stops. The class "interacting" is added to
-the Element throughout the duration of the interaction.
+interact with it and its child Elements, until the user triggers a `focus` event
+somewhere outside of the compoenent. The class "interacting" is added to the
+Element throughout the duration of the interaction.
 
 This feature is useful for keeping a parent component in the "interacting" state
 (visually, perhaps) while the user interacts with a child context menu or
@@ -578,9 +587,10 @@ async onLoad() {
 
 *Render queueing is currently an experimental feature.*
 
-Render queueing is an advanced optimization that minimizes the impact of
-rendering a large amount of components at once, specifically components that
-trigger network requests.
+Render queueing is an advanced optimization technique that minimizes the impact of
+rendering a large amount of components at once, specifically ones that trigger
+network requests. The goal of render queueing is to avoid spikes of API
+requests hitting your server, at the cost of slightly slower UI loading.
 
 Render queueing is much like lazy rendering - the component enters the DOM,
 `spawn` is triggered, then it waits. Except, unlike lazy rendering, the
@@ -593,42 +603,7 @@ be added to the render queue as soon as they enter the DOM.
 Components that use render queueing, and **do** also use lazy rendering, will
 be added to the render queue as soon as they are visible in the viewport.
 
-#### The Problem
-
-Render queueing is designed to improve the rendering experience of components
-that rely on network requests for their data, when it's necessary to insert many
-at once.
-
-When a large number of network-reliant components must be rendered at once, the
-most seemingly straightforward method for reducing the impact of this operation
-would be to throttle the speed of their DOM insertion. Perhaps even having them
-render one after another.
-
-This could be done by a parent component; but there are a few issues with this
-approach in general. The parent component's complexity was just increased, the
-throttling code cannot easily be shared with other components, and what happens
-if suddenly new types of network-reliant components are introduced?
-
-Not to mention the biggest problem of all... if a parent component is throttling
-DOM insertions, then those components literally don't exist at all. They cannot
-be counted or interacted with, but *should* exist since something told the
-parent component to render them in the first place. Since there is no virtual
-DOM, getting components into the DOM in a timely manner, but also not pounding
-the network, is a critically important task.
-
-And in general, it's a bad idea to have any one component be responsible for the
-smooth rendering of another component. It creates an avoidable coupling.
-
-#### The Solution
-
-Lowrider.js offers render queueing as a solution for inserting any number of
-network intensive components. Render queueing is very simple to use, requires no
-restructuring of your component, and is compatable with lazy rendering.
-
-The queues themselves are not bound to any single component in the DOM, and
-instead are attached to the global `window` object.
-
-To enable it, just use the attribute.
+To enable it render queueing, just use the attribute.
 
 ```html
 <!-- use the default queue -->
@@ -680,22 +655,14 @@ environment).
 #### Named Render Queues
 
 Any name can be given to a render queue and that queue will be created on
-demand. Queues are global and can be used by any Element in the DOM.
+the fly. Queues are global and can be used by any Element in the DOM.
 
 If no name is given, the name will be "default".
 
 #### When to use Render Queues
 
-Render queues are not needed in most cases. In fact, the main optimization that
-render queueing offers is a reduction in the number of **simultaneous** requests
-hitting your API. The optimization is felt mostly server side, not client side.
-
-The browser can easily handle adding 100 new elements to the DOM; the issues
-begin when those 100 elements require a few network API calls each, resulting in
-large amount of queries hitting your API at once.
-
 It is recommended to optimize using [lazy rendering](#lazy-rendering) first.
-It is easier to use and more straightfoward.
+It is easier to use and more straightfoward, and acts as psuedo pagination.
 
 If you find your lazily rendered components are still coming in too fast for
 your API, then it's now a good time to try and use render queues. Ultimately,
