@@ -122,7 +122,8 @@ For each lifecycle event, there is a hook.
 
 Since web components cannot exist outside of the DOM, the components themselves
 cannot be tasked with caching their own contents. Instead, that responsibility
-typically falls to the UI's router or a purpose built module.
+typically falls to the UI's router, a purpose built module, or the browser
+itself if there is no single-page application.
 
 Lowrider.js is flexible and can work with anything that can stringify HTML. As
 long as the component author utilizes the lifecycle hooks properly, Lowrider.js
