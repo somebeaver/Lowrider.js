@@ -172,7 +172,7 @@ Lowrider.register('my-element', MyElement)
 ```
 
 Components only need to be registered once, then can be used in the DOM. Trying
-to register a component that was already registered will throw in an error.
+to register a component that was already registered will throw an error.
 
 Lowrider.js components can also be registered with vanilla JS, as long as the class
 extends `Lowrider`.
@@ -670,6 +670,37 @@ your API, then it's now a good time to try and use render queues. Ultimately,
 your component will spend more time in a loading state since clearly there is a
 bottleneck, but your components will hit your API one-by-one, instead of all at
 once.
+
+## When to use Lowrider.js
+
+Lowrider.js is named after its purpose: to stay as close to the DOM as possible.
+To that end, it abstracts as little as possible, and implements *features*
+instead of *concepts*, with the exception of the [component
+lifecycle](#lifecycle), which is the one novel concept that is introduced.
+
+There are two expected use cases for Lowrider.js:
+
+1. Your project is a web based UI for an *application*, not just a *single-page app
+   website*.
+
+Lowrider.js components are meant to leverage the performance advantages of
+running without DOM abstraction. There is no support for any sort of server side
+rendering, and you will have a bad time if you want a SEO friendly website.
+
+Lowrider.js is well suited for application-like projects that run in Electron
+and browsers. The types of applications that are destined for use as installable
+system applications, but with a web stack UI, and a fallback version that runs
+in the browser.
+
+2. You plan to incorporate Lowrider.js into a larger toolchain.
+
+Lowrider.js components are happy to be injected into the DOM with their content
+pre-rendered, but you'll have to implement it on your own. If you find yourself
+needing features like pre-rendering, code splittng, or css-in-js, you may find
+it easier to go with a framework like Next.js.
+
+But if you're looking to DIY it and implement your own solutions, Lowrider.js
+can be a great jumping-off point.
 
 ## Testing
 
