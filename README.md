@@ -28,11 +28,9 @@ For documentation about Lowrider.js methods, see **[DOCS.md](DOCS.md)**.
 
 Throughout this documentation and source code, these words are defined as:
 
-- `component` - When referring to a DOM Element, it **always** means one that
-    extends the `Lowrider` class. Otherwise, it refers to the concept of
-    application components in general.
-- `Element` - When capitalized, it **always** refers to a DOM Element instance.
-- `element` - When lowercase, it refers to DOM elements in general.
+- `component` - When referring to a DOM Element, it always means one that
+    extends the `Lowrider` class.
+- `Element` - When capitalized, it always refers to a DOM Element instance.
 
 ## Concepts
 
