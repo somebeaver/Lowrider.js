@@ -43,12 +43,12 @@ understanding the lifecycle is key to writing efficient Lowrider.js components.
 ### Lifecycle
 
 Lowrider.js web components begin existing at DOM insertion and stop existing at
-DOM removal; everything that happens in between is the lifecycle. Reacting to
-**[lifecycle events](#lifecycle-events)** with **[hooks](#hooks)** is how
-Lowrider.js components come to life.
+DOM removal. Upon DOM insertion, the lifecycle begins, which is comprised of a
+few events. Reacting to **[lifecycle events](#lifecycle-events)** with
+**[hooks](#hooks)** is how Lowrider.js components come to life.
 
 Just like vanilla web components, Lowrider.js components only exist in memory
-while they exist in the DOM. As such, lifecycle events can only happen while the
+while they exist in the DOM. Lifecycle events can only happen while the
 component exists in the DOM, and Lowrider.js's true power is in how it
 automatically manages these events to **maintain component state** while the
 component enters/exits/reenters the DOM, **optimize rendering**, and **remove
@@ -56,15 +56,15 @@ the need for a virtual DOM**.
 
 #### Lifecycle Events
 
-0. *An instance of the component (custom element that extends `Lowrider`) is inserted into the DOM.*
+0. *An instance of a component (custom element that extends `Lowrider`) is inserted into the DOM.*
 1. **`spawn`** - Immediately, the `spawn` event fires. The component knows of
    its own existance and the document in which it lives.
-2. **`build`** - Immediately after spawning is completed, the component enters the
-   `build` lifecycle event. It should now build itself (i.e., query an
-   API, inject inner HTML, spawn more components). This step is **skipped** when
-   using a cached component.
-3. **`load`** - One event loop tick after building is completed, the component
-   enters the `load` lifecycle event. It can now manipulate its child
+2. **`build`** - Immediately after `spawn` is completed, the component enters
+   the `build` lifecycle event. It should now build its inner HTML (i.e., query
+   an API, file system lookups in Electron, create inner components). This step
+   is **skipped** when using a cached component.
+3. **`load`** - One event loop tick after `build` is completed, the component
+   enters the `load` lifecycle event. It can now manipulate its inner
    HTML, and should listen for user interaction, or wait for DOM removal.
 4. **`removed`** - Final moments before the component is removed from the DOM
    and memory.
