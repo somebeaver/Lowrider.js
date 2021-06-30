@@ -680,19 +680,19 @@ lifecycle](#lifecycle), which is the one novel concept that is introduced.
 
 There are two expected use cases for Lowrider.js:
 
-1. Your project is a web based UI for an *application*, not just a *single-page app
-   website*.
+1. **Your project is a web based UI for an *application*, not just a *single-page app
+   website***.
 
 Lowrider.js components are meant to leverage the performance advantages of
 running without DOM abstraction. There is no support for any sort of server side
 rendering, and you will have a bad time if you want a SEO friendly website.
 
 Lowrider.js is well suited for application-like projects that run in Electron
-and browsers. The types of applications that are destined for use as installable
-system applications, but with a web stack UI, and a fallback version that runs
-in the browser.
+and browsers. These types of applications are typically destined for use as
+installable system applications, but with a web stack UI, and a fallback version
+that runs in the browser.
 
-2. You plan to incorporate Lowrider.js into a larger toolchain.
+2. **You plan to incorporate Lowrider.js into a larger toolchain**.
 
 Lowrider.js components are happy to be injected into the DOM with their content
 pre-rendered, but you'll have to implement it on your own. If you find yourself
