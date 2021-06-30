@@ -671,36 +671,18 @@ your component will spend more time in a loading state since clearly there is a
 bottleneck, but your components will hit your API one-by-one, instead of all at
 once.
 
-## When to use Lowrider.js
+## SEO
 
-Lowrider.js is named after its purpose: to stay as close to the DOM as possible.
-To that end, it abstracts as little as possible, and implements *features*
-instead of *concepts*, with the exception of the [component
-lifecycle](#lifecycle), which is the one novel concept that is introduced.
+Lowrider.js gives web application developers the ability to leverage the
+advantages of working as closly to the browser as possible. It does not offer
+any server side features, which are particularly important for SEO.
 
-There are two expected use cases for Lowrider.js:
+If SEO is a consideration for your project, a component library with server side
+rendering may be a better choice.
 
-**1. Your project is a web based UI for an *application*, not just a *single-page app
-   website***.
-
-Lowrider.js components are meant to leverage the performance advantages of
-running without DOM abstraction. There is no support for any sort of server side
-rendering, and you will have a bad time if you want a SEO friendly website.
-
-Lowrider.js is well suited for application-like projects that run in Electron
-and browsers. These types of applications are typically destined for use as
-installable system applications, but with a web stack UI, and a fallback version
-that runs in the browser.
-
-**2. You plan to incorporate Lowrider.js into a larger toolchain**.
-
-Lowrider.js components are happy to be injected into the DOM with their content
-pre-rendered, but you'll have to implement it on your own. If you find yourself
-needing features like pre-rendering, code splittng, or css-in-js, you may find
-it easier to go with a framework like Next.js.
-
-But if you're looking to DIY it and implement your own solutions, Lowrider.js
-can be a great jumping-off point.
+Otherwise, the onus is on the developer to send their components to the browser
+with their inner HTML included, so that components may hydrate their contents
+instead of performing template lookups.
 
 ## Testing
 
