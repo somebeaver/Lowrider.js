@@ -76,7 +76,7 @@ components immediately go through when inserted into the DOM.**
 automatically render themselves upon DOM insertion, the method does not need to be
 invoked unless you want to *re*render. More on the [render method](#render).
 
-### Hooks
+## Hooks
 
 Hooks are called by Lowrider.js when certain lifecycle events happen. Hooks
 should always be `async` functions, or if not, must return a `Promise`. Have the
@@ -118,7 +118,7 @@ For each lifecycle event, there is a hook.
   - Example tasks: removing event listeners on other non-child elements.
   - **Do not** use this to save on-close state.
 
-### Caching
+## Caching
 
 Since web components cannot exist outside of the DOM, the components themselves
 cannot be tasked with caching their own contents. Instead, that responsibility
