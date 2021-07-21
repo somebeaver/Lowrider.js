@@ -6,7 +6,8 @@ apps](https://cardinalapps.xyz).*
 **Lowrider.js** is a small dependency-free ES6 JavaScript library that enhances
 [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components) by
 implementing a **[lifecycle](#lifecycle)** that turns them into stateful,
-reusable, powerful components for building single-page applications.
+reusable, powerful components for building single-page applications. There's no
+virtual DOM to be found here!
 
 Lowrider.js also provides unopinionated functionality for:
  - [Lazy rendering](#lazy-rendering)
@@ -19,6 +20,12 @@ Lowrider.js also provides unopinionated functionality for:
  - [File drag and drop (drop zone)](#drop-area)
  - Singletons
  - And more
+
+## create-lowrider-app
+
+Check out the
+[create-lowrider-app](https://github.com/somebeaver/create-lowrider-app)
+repository for an example of a Lowrider.js app.
 
 ## API Reference
 
@@ -76,9 +83,10 @@ invoked unless you want to *re*render. More on the [render method](#render).
 
 ## Hooks
 
-Hooks are called by Lowrider.js when certain lifecycle events happen. Hooks
-should always be `async` functions, or if not, must return a `Promise`. Have the
-hook return or resolve false (*not* `reject()`) to stop rendering the
+The hooks in Lowrider.js are not like the hooks in React. In Lowrider.js, hooks
+are just callbacks that are triggered when certain lifecycle events happen.
+Hooks should always be `async` functions, or if not, must return a `Promise`.
+Have the hook return or resolve false (*not* `reject()`) to stop rendering the
 component.
 
 For each lifecycle event, there is a hook.
@@ -671,16 +679,8 @@ once.
 
 ## SEO
 
-Lowrider.js gives web application developers the ability to leverage the
-advantages of working as closly to the browser as possible. It does not offer
-any server side features, which are particularly important for SEO.
-
-If SEO is a consideration for your project, a component library with server side
-rendering may be a better choice.
-
-Otherwise, the onus is on the developer to send their components to the browser
-with their inner HTML included, so that components may hydrate their contents
-instead of performing template lookups.
+Don't use Lowrider.js if SEO if a concern for your project. You would need to
+prerender your pages server side, and that's no easy feat.
 
 ## Testing
 
